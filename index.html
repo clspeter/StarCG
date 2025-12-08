@@ -138,6 +138,79 @@
             font-weight: 700;
         }
 
+        /* 快捷按鈕區 */
+        .quick-buttons-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .quick-buttons-group {
+            margin-bottom: 12px;
+        }
+
+        .quick-buttons-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .quick-buttons-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .quick-buttons-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .quick-buttons-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .quick-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 8px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-blue);
+            border-radius: 6px;
+            color: var(--accent-blue);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: var(--accent-blue);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+        }
+
+        .quick-select {
+            flex: 1;
+            min-width: 150px;
+            padding: 8px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent-blue);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+        }
+
         .input-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -881,11 +954,131 @@
             <div class="card">
                 <div class="card-title">✨ 技能傷害倍率</div>
                 <div class="input-group">
-                    <label>技能倍率 (45% ~ 220%)</label>
+                    <label>技能倍率 (20% ~ 220%)</label>
                     <div class="skill-input-row">
-                        <input type="range" id="skillMultiplierRange" min="45" max="220" value="100">
-                        <input type="number" id="skillMultiplierInput" min="45" max="220" value="100" inputmode="numeric">
+                        <input type="range" id="skillMultiplierRange" min="20" max="220" value="100">
+                        <input type="number" id="skillMultiplierInput" min="20" max="220" value="100" inputmode="numeric">
                         <span class="percent-sign">%</span>
+                    </div>
+                </div>
+                
+                <!-- 快捷按鈕區 -->
+                <div class="quick-buttons-section">
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">寵物乾坤</div>
+                        <div class="quick-buttons-row">
+                            <button class="quick-btn" onclick="setSkillMultiplier(150)">III (150%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(170)">IV (170%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(190)">V (190%)</button>
+                        </div>
+                        <div class="quick-buttons-row">
+                            <button class="quick-btn" onclick="setSkillMultiplier(200)">◆ (200%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(210)">◆◆ (210%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(220)">◆◆◆ (220%)</button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">特殊技能</div>
+                        <div class="quick-buttons-row">
+                            <button class="quick-btn" onclick="setSkillMultiplier(210)">歌姬/滅龍 (210%)</button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">人物亂射（首3箭）</div>
+                        <div class="quick-buttons-row">
+                            <button class="quick-btn" onclick="setSkillMultiplier(50)">第1箭 (50%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(35)">第2箭 (35%)</button>
+                            <button class="quick-btn" onclick="setSkillMultiplier(20)">第3箭 (20%)</button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">人物乾坤</div>
+                        <div class="quick-buttons-row">
+                            <select id="qiankunLevel" class="quick-select" onchange="setQiankunMultiplier()">
+                                <option value="">選擇等級</option>
+                                <option value="1">1等 (110%)</option>
+                                <option value="2">2等 (120%)</option>
+                                <option value="3">3等 (130%)</option>
+                                <option value="4">4等 (140%)</option>
+                                <option value="5">5等 (150%)</option>
+                                <option value="6">6等 (160%)</option>
+                                <option value="7">7等 (170%)</option>
+                                <option value="8">8等 (180%)</option>
+                                <option value="9">9等 (190%)</option>
+                                <option value="10">10等 (200%)</option>
+                                <option value="11">11等 (210%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">人物迴旋</div>
+                        <div class="quick-buttons-row">
+                            <select id="huixuanLevel" class="quick-select" onchange="setHuixuanMultiplier()">
+                                <option value="">選擇等級</option>
+                                <option value="1-1">1等 低 (56%)</option>
+                                <option value="1-2">1等 中 (70%)</option>
+                                <option value="1-3">1等 高 (84%)</option>
+                                <option value="2-1">2等 低 (60%)</option>
+                                <option value="2-2">2等 中 (75%)</option>
+                                <option value="2-3">2等 高 (90%)</option>
+                                <option value="3-1">3等 低 (64%)</option>
+                                <option value="3-2">3等 中 (80%)</option>
+                                <option value="3-3">3等 高 (96%)</option>
+                                <option value="4-1">4等 低 (68%)</option>
+                                <option value="4-2">4等 中 (85%)</option>
+                                <option value="4-3">4等 高 (102%)</option>
+                                <option value="5-1">5等 低 (72%)</option>
+                                <option value="5-2">5等 中 (90%)</option>
+                                <option value="5-3">5等 高 (108%)</option>
+                                <option value="6-1">6等 低 (76%)</option>
+                                <option value="6-2">6等 中 (95%)</option>
+                                <option value="6-3">6等 高 (114%)</option>
+                                <option value="7-1">7等 低 (80%)</option>
+                                <option value="7-2">7等 中 (100%)</option>
+                                <option value="7-3">7等 高 (120%)</option>
+                                <option value="8-1">8等 低 (84%)</option>
+                                <option value="8-2">8等 中 (105%)</option>
+                                <option value="8-3">8等 高 (126%)</option>
+                                <option value="9-1">9等 低 (88%)</option>
+                                <option value="9-2">9等 中 (110%)</option>
+                                <option value="9-3">9等 高 (132%)</option>
+                                <option value="10-1">10等 低 (92%)</option>
+                                <option value="10-2">10等 中 (115%)</option>
+                                <option value="10-3">10等 高 (138%)</option>
+                                <option value="11-1">11等 低 (96%)</option>
+                                <option value="11-2">11等 中 (120%)</option>
+                                <option value="11-3">11等 高 (144%)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-buttons-group">
+                        <div class="quick-buttons-label">人物追月</div>
+                        <div class="quick-buttons-row">
+                            <select id="zhuiyueLevel" class="quick-select" onchange="setZhuiyueMultiplier()">
+                                <option value="">選擇等級</option>
+                                <option value="1">1等 I型 (70%)</option>
+                                <option value="2">2等 I型 (75%)</option>
+                                <option value="3">3等 I型 (80%)</option>
+                                <option value="4">4等 I型 (85%)</option>
+                                <option value="5">5等 T型 (75%)</option>
+                                <option value="6">6等 T型 (78%)</option>
+                                <option value="7">7等 T型 (81%)</option>
+                                <option value="8">8等 T型 (85%)</option>
+                                <option value="9">9等 III型 (75%)</option>
+                                <option value="10">10等 III型 (80%)</option>
+                                <option value="11">11等 III型 (95%)</option>
+                            </select>
+                            <label class="toggle-switch" style="margin-left: 10px;">
+                                <input type="checkbox" id="zhuiyuePVE" onchange="setZhuiyueMultiplier()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span class="toggle-label" style="font-size: 0.85rem;">PVE增傷</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1338,7 +1531,7 @@
         skillInput.addEventListener('input', function() {
             // 輸入時不強制限制，讓使用者可以自由輸入
             const val = parseInt(this.value);
-            if (!isNaN(val) && val >= 45 && val <= 220) {
+            if (!isNaN(val) && val >= 20 && val <= 220) {
                 skillRange.value = val;
                 calculate();
             }
@@ -1347,7 +1540,7 @@
         skillInput.addEventListener('blur', function() {
             // 失去焦點時才驗證並修正數值
             let val = parseInt(this.value);
-            if (isNaN(val) || val < 45) val = 45;
+            if (isNaN(val) || val < 20) val = 20;
             if (val > 220) val = 220;
             this.value = val;
             skillRange.value = val;
@@ -1360,6 +1553,71 @@
                 this.blur();
             }
         });
+
+        // 快捷按鈕處理函數
+        function setSkillMultiplier(value) {
+            skillInput.value = value;
+            skillRange.value = value;
+            calculate();
+        }
+
+        function setQiankunMultiplier() {
+            const level = parseInt(document.getElementById('qiankunLevel').value);
+            if (level && level >= 1 && level <= 11) {
+                setSkillMultiplier(100 + level * 10);
+            }
+        }
+
+        function setHuixuanMultiplier() {
+            const value = document.getElementById('huixuanLevel').value;
+            if (!value) return;
+            
+            const huixuanTable = {
+                '1-1': 56, '1-2': 70, '1-3': 84,
+                '2-1': 60, '2-2': 75, '2-3': 90,
+                '3-1': 64, '3-2': 80, '3-3': 96,
+                '4-1': 68, '4-2': 85, '4-3': 102,
+                '5-1': 72, '5-2': 90, '5-3': 108,
+                '6-1': 76, '6-2': 95, '6-3': 114,
+                '7-1': 80, '7-2': 100, '7-3': 120,
+                '8-1': 84, '8-2': 105, '8-3': 126,
+                '9-1': 88, '9-2': 110, '9-3': 132,
+                '10-1': 92, '10-2': 115, '10-3': 138,
+                '11-1': 96, '11-2': 120, '11-3': 144
+            };
+            
+            if (huixuanTable[value]) {
+                setSkillMultiplier(huixuanTable[value]);
+            }
+        }
+
+        function setZhuiyueMultiplier() {
+            const level = parseInt(document.getElementById('zhuiyueLevel').value);
+            if (!level) return;
+            
+            const zhuiyueTable = {
+                1: 70, 2: 75, 3: 80, 4: 85,  // I型
+                5: 75, 6: 78, 7: 81, 8: 85,  // T型
+                9: 75, 10: 80, 11: 95        // III型
+            };
+            
+            let baseMultiplier = zhuiyueTable[level];
+            if (!baseMultiplier) return;
+            
+            const isPVE = document.getElementById('zhuiyuePVE').checked;
+            if (isPVE) {
+                // PVE額外增傷: (20 + 技能等級 * 2)%，11等為45%，直接加到基礎倍率上
+                let pveBonus;
+                if (level === 11) {
+                    pveBonus = 45;
+                } else {
+                    pveBonus = 20 + level * 2;
+                }
+                baseMultiplier = baseMultiplier + pveBonus;
+            }
+            
+            setSkillMultiplier(baseMultiplier);
+        }
 
         function formatModifier(value, isPercent = true) {
             if (value === 0) return '<span class="modifier-neutral">+0%</span>';
