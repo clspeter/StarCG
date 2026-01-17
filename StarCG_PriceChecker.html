@@ -978,6 +978,9 @@ async function searchMarket() {
     showLoading(true);
     hideAll();
     
+    // 清空舊的歷史資料，讓切換 tab 時重新搜尋
+    allHistoryLogs = [];
+    
     try {
         allMarketItems = await fetchMarketData(keyword);
         
@@ -1465,7 +1468,7 @@ function updateStats(items) {
 /* ========================================
    UI 輔助
 ======================================== */
-function switchTab(tab) {
+async function switchTab(tab) {
     currentTab = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
@@ -1473,6 +1476,29 @@ function switchTab(tab) {
     document.getElementById('marketSection').style.display = tab === 'market' ? 'block' : 'none';
     document.getElementById('historySection').style.display = tab === 'history' ? 'block' : 'none';
     document.getElementById('statsGrid').style.display = tab === 'market' ? 'grid' : 'none';
+    
+    // 切換到歷史成交時，如果還沒有資料就自動搜尋
+    if (tab === 'history' && allHistoryLogs.length === 0) {
+        const keyword = document.getElementById('searchInput').value.trim();
+        if (keyword) {
+            showLoading(true);
+            document.getElementById('historySection').style.display = 'none';
+            try {
+                allHistoryLogs = await fetchHistoryData(keyword);
+                if (allHistoryLogs.length > 0) {
+                    renderHistoryData();
+                    document.getElementById('historySection').style.display = 'block';
+                } else {
+                    showEmpty('找不到歷史成交記錄');
+                }
+            } catch (err) {
+                console.error(err);
+                showEmpty('搜尋歷史失敗');
+            } finally {
+                showLoading(false);
+            }
+        }
+    }
 }
 
 function showLoading(show) {
