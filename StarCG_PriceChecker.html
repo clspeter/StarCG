@@ -447,27 +447,27 @@
             opacity: 0.5;
         }
 
-        /* Chart Container */
-        .chart-container {
+        /* Inline Chart Container (在表格行內) */
+        .inline-chart-container {
             background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-top: 20px;
+            padding: 16px;
+            border-top: 2px solid var(--border);
         }
 
-        .chart-title {
-            font-size: 1rem;
+        .inline-chart-container .chart-title {
+            font-size: 0.95rem;
             font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 12px;
+            color: var(--text-primary);
         }
 
-        .chart-wrapper {
+        .inline-chart-wrapper {
             position: relative;
-            height: 300px;
+            height: 250px;
+        }
+
+        .chart-row td {
+            padding: 0 !important;
         }
 
         /* History Summary */
@@ -867,13 +867,7 @@
             </div>
         </div>
 
-        <div class="chart-container" id="chartContainer" style="display: none;">
-            <div class="chart-title">📈 價格走勢圖 - <span id="chartItemName"></span></div>
-            <div class="chart-wrapper">
-                <canvas id="priceChart"></canvas>
-            </div>
         </div>
-    </div>
 
     <!-- Empty State -->
     <div class="empty-state" id="emptyState">
@@ -896,8 +890,8 @@ let allMarketItems = [];
 let allHistoryLogs = [];
 let quickTags = JSON.parse(localStorage.getItem('starcg_quickTags')) || ['一箱面包', '一箱法國面包', '一箱壽喜鍋'];
 let currentSort = { field: 'price', order: 'asc' };
-let priceChartInstance = null;
 let currentTab = 'market';
+const chartInstances = {};
 
 /* ========================================
    初始化
@@ -978,8 +972,11 @@ async function searchMarket() {
     showLoading(true);
     hideAll();
     
-    // 清空舊的歷史資料，讓切換 tab 時重新搜尋
+    // 清空舊的歷史資料和圖表，讓切換 tab 時重新搜尋
     allHistoryLogs = [];
+    // 銷毀所有圖表實例
+    Object.values(chartInstances).forEach(chart => chart.destroy());
+    Object.keys(chartInstances).forEach(key => delete chartInstances[key]);
     
     try {
         allMarketItems = await fetchMarketData(keyword);
@@ -1343,9 +1340,9 @@ function renderHistoryData() {
         total: data.total
     }));
     
-    // 渲染表格
+    // 渲染表格（每個物件後面加上圖表行）
     const tbody = document.getElementById('historyBody');
-    tbody.innerHTML = stats.map(row => `
+    tbody.innerHTML = stats.map((row, index) => `
         <tr>
             <td><strong>${escapeHtml(row.item)}</strong></td>
             <td style="color:var(--accent-green)">${row.minCoin ? row.minCoin.toLocaleString() : '-'}</td>
@@ -1355,29 +1352,43 @@ function renderHistoryData() {
             <td style="color:var(--accent-gold)">${row.avgCrystal ? row.avgCrystal.toLocaleString() : '-'}</td>
             <td style="color:var(--accent-red)">${row.maxCrystal ? row.maxCrystal.toLocaleString() : '-'}</td>
             <td>${row.total}</td>
-            <td><button class="secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="showChart('${escapeHtml(row.item)}')">📈</button></td>
+            <td><button class="secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="toggleChart(${index}, '${escapeHtml(row.item)}')">📈</button></td>
+        </tr>
+        <tr id="chartRow${index}" class="chart-row" style="display:none;">
+            <td colspan="9" style="padding:0; background:var(--bg-dark);">
+                <div class="inline-chart-container">
+                    <div class="chart-title">📈 ${escapeHtml(row.item)} 價格走勢</div>
+                    <div class="inline-chart-wrapper">
+                        <canvas id="chart${index}"></canvas>
+                    </div>
+                </div>
+            </td>
         </tr>
     `).join('');
     
     document.getElementById('historySection').style.display = 'block';
 }
 
-function showChart(itemName) {
-    const container = document.getElementById('chartContainer');
-    document.getElementById('chartItemName').textContent = itemName;
+function toggleChart(index, itemName) {
+    const chartRow = document.getElementById(`chartRow${index}`);
+    const isVisible = chartRow.style.display !== 'none';
     
-    // 篩選該物品的資料
-    const itemLogs = allHistoryLogs.filter(l => l.item === itemName);
-    const coinData = itemLogs.filter(l => l.pricetype === 0).sort((a, b) => new Date(a.time) - new Date(b.time));
-    const crystalData = itemLogs.filter(l => l.pricetype === 1).sort((a, b) => new Date(a.time) - new Date(b.time));
-    
-    // 銷毀舊圖表
-    if (priceChartInstance) {
-        priceChartInstance.destroy();
+    if (isVisible) {
+        chartRow.style.display = 'none';
+        return;
     }
     
-    // 建立新圖表
-    const ctx = document.getElementById('priceChart').getContext('2d');
+    chartRow.style.display = '';
+    
+    // 如果已經畫過就不重畫
+    if (chartInstances[index]) return;
+    
+    // 篩選該物品的資料並簡化
+    const itemLogs = allHistoryLogs.filter(l => l.item === itemName);
+    const coinData = simplifyData(itemLogs.filter(l => l.pricetype === 0).sort((a, b) => new Date(a.time) - new Date(b.time)));
+    const crystalData = simplifyData(itemLogs.filter(l => l.pricetype === 1).sort((a, b) => new Date(a.time) - new Date(b.time)));
+    
+    const ctx = document.getElementById(`chart${index}`).getContext('2d');
     
     const datasets = [];
     if (coinData.length > 0) {
@@ -1386,8 +1397,8 @@ function showChart(itemName) {
             data: coinData.map(d => ({ x: d.time, y: d.price })),
             borderColor: '#d4a024',
             backgroundColor: 'rgba(212, 160, 36, 0.15)',
-            tension: 0.3,
-            pointRadius: 4,
+            tension: 0.4,
+            pointRadius: 3,
             borderWidth: 2,
             fill: true
         });
@@ -1398,28 +1409,22 @@ function showChart(itemName) {
             data: crystalData.map(d => ({ x: d.time, y: d.price })),
             borderColor: '#9068b0',
             backgroundColor: 'rgba(144, 104, 176, 0.15)',
-            tension: 0.3,
-            pointRadius: 4,
+            tension: 0.4,
+            pointRadius: 3,
             borderWidth: 2,
             fill: true
         });
     }
     
-    priceChartInstance = new Chart(ctx, {
+    chartInstances[index] = new Chart(ctx, {
         type: 'line',
         data: { datasets },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                intersect: false,
-                mode: 'index'
-            },
+            interaction: { intersect: false, mode: 'index' },
             plugins: {
-                legend: {
-                    display: true,
-                    labels: { color: '#4a3f35' }
-                },
+                legend: { display: true, labels: { color: '#4a3f35' } },
                 tooltip: {
                     backgroundColor: '#fffbf5',
                     borderColor: '#e0d5c5',
@@ -1431,8 +1436,12 @@ function showChart(itemName) {
             scales: {
                 x: {
                     type: 'category',
-                    labels: [...new Set([...coinData, ...crystalData].map(d => d.time.split(' ')[0]))],
-                    ticks: { color: '#8b7355' },
+                    ticks: { 
+                        color: '#8b7355',
+                        maxTicksLimit: 8,
+                        maxRotation: 45,
+                        minRotation: 0
+                    },
                     grid: { color: '#e0d5c5' }
                 },
                 y: {
@@ -1442,10 +1451,33 @@ function showChart(itemName) {
             }
         }
     });
-    
-    container.style.display = 'block';
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// 簡化數據：合併相同價格的連續數據點
+function simplifyData(data) {
+    if (data.length <= 20) return data;
+    
+    const simplified = [];
+    let lastPrice = null;
+    let lastTime = null;
+    
+    data.forEach((d, i) => {
+        // 保留第一筆、最後一筆、價格變化的點
+        if (i === 0 || i === data.length - 1 || d.price !== lastPrice) {
+            // 如果跳過了很多相同價格的點，加一個中間點標記
+            if (lastPrice !== null && d.price === lastPrice && simplified.length > 0) {
+                // 已經有相同價格的起點了，跳過
+            } else {
+                simplified.push(d);
+            }
+            lastPrice = d.price;
+            lastTime = d.time;
+        }
+    });
+    
+    return simplified;
+}
+
 
 function updateStats(items) {
     const currency = document.getElementById('currencyFilter').value;
@@ -1510,7 +1542,6 @@ function hideAll() {
     document.getElementById('marketSection').style.display = 'none';
     document.getElementById('historySection').style.display = 'none';
     document.getElementById('statsGrid').style.display = 'none';
-    document.getElementById('chartContainer').style.display = 'none';
 }
 
 function showEmpty(msg) {
