@@ -109,6 +109,10 @@
             min-width: 200px;
         }
 
+        .exchange-rate-group input {
+            width: 100px;
+        }
+
         input[type="text"], input[type="number"], select {
             background: var(--bg-dark);
             border: 1px solid var(--border);
@@ -489,21 +493,40 @@
             font-weight: 600;
         }
 
-        /* Responsive */
+        /* Responsive - 平板 */
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
+            }
+
+            .header {
+                flex-wrap: wrap;
             }
 
             .header h1 {
                 font-size: 1.25rem;
             }
 
+            .header a {
+                font-size: 0.75rem;
+                margin-left: 0;
+                width: 100%;
+                margin-top: 8px;
+            }
+
             .search-row {
                 flex-direction: column;
             }
 
+            .form-group {
+                width: 100%;
+            }
+
             .form-group.grow {
+                width: 100%;
+            }
+
+            .search-row button {
                 width: 100%;
             }
 
@@ -520,6 +543,132 @@
                 text-align: center;
                 padding: 10px 12px;
                 font-size: 0.9rem;
+            }
+
+            /* 表格水平滾動 */
+            .table-container {
+                overflow: hidden;
+            }
+
+            .table-scroll {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+
+        /* Responsive - 手機 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header h1 {
+                font-size: 1.1rem;
+            }
+
+            .header .badge {
+                font-size: 0.65rem;
+                padding: 3px 8px;
+            }
+
+            .search-panel {
+                padding: 12px;
+            }
+
+            .form-group label {
+                font-size: 0.85rem;
+            }
+
+            input[type="text"], input[type="number"], select {
+                padding: 10px 12px;
+                font-size: 1rem;
+            }
+
+            button {
+                padding: 12px 16px;
+                font-size: 1rem;
+            }
+
+            .quick-tags {
+                gap: 6px;
+            }
+
+            .quick-tag {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 12px 8px;
+            }
+
+            .stat-card .label {
+                font-size: 0.8rem;
+            }
+
+            .stat-card .value {
+                font-size: 1.3rem;
+            }
+
+            .tabs {
+                padding: 3px;
+            }
+
+            .tab {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            td, th {
+                padding: 10px 8px;
+                font-size: 0.9rem;
+            }
+
+            .price {
+                font-size: 0.9rem;
+            }
+
+            .converted {
+                display: block;
+                margin-left: 0;
+                margin-top: 2px;
+                font-size: 0.8rem;
+            }
+
+            .grade-normal, .grade-silver, .grade-gold {
+                font-size: 0.7rem;
+                padding: 1px 6px;
+                margin-left: 4px;
+            }
+
+            .server-badge {
+                font-size: 0.65rem;
+                padding: 1px 5px;
+            }
+
+            .chart-container {
+                padding: 12px;
+            }
+
+            .chart-wrapper {
+                height: 250px;
+            }
+
+            .empty-state {
+                padding: 40px 16px;
+            }
+
+            .empty-state .icon {
+                font-size: 2.5rem;
             }
         }
 
@@ -568,7 +717,7 @@
         <h1>⭐ 星詠魔力 市場查價器</h1>
         <span class="badge">v2.0</span>
         <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" 
-           style="margin-left:auto; color:var(--accent-gold); font-size:0.85rem; text-decoration:none;">
+           style="margin-left:auto; background:#fff3cd; color:#856404; font-size:1rem; text-decoration:none; padding:8px 16px; border-radius:8px; border:2px solid #ffc107; font-weight:600;">
             ⚠️ 首次使用請先點此開通權限
         </a>
     </div>
@@ -604,9 +753,9 @@
                     <option value="all">全部</option>
                 </select>
             </div>
-            <div class="form-group">
+            <div class="form-group exchange-rate-group">
                 <label>💱 匯率 (魔幣:魔晶)</label>
-                <input type="number" id="exchangeRate" value="300" min="1" style="width:80px;">
+                <input type="number" id="exchangeRate" value="300" min="1">
             </div>
             <div class="form-group">
                 <button id="searchBtn">🔍 搜尋市場</button>
