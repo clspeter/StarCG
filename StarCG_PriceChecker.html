@@ -716,9 +716,9 @@
     <div class="header">
         <h1>⭐ 星詠魔力 市場查價器</h1>
         <span class="badge">v2.0</span>
-        <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" 
-           style="margin-left:auto; background:#fff3cd; color:#856404; font-size:1rem; text-decoration:none; padding:8px 16px; border-radius:8px; border:2px solid #ffc107; font-weight:600;">
-            ⚠️ 首次使用請先點此開通權限
+        <a href="https://member.starcg.net/market.php" target="_blank" 
+           style="margin-left:auto; color:var(--text-secondary); font-size:0.9rem; text-decoration:none;">
+            📋 官方市場
         </a>
     </div>
 
@@ -868,9 +868,9 @@
 /* ========================================
    全域變數
 ======================================== */
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-const API_MARKET = CORS_PROXY + 'https://member.starcg.net/market.php';
-const API_HISTORY = CORS_PROXY + 'https://member.starcg.net/marketrecord.php';
+const CORS_PROXY = 'https://corsproxy.io/?';
+const API_MARKET_BASE = 'https://member.starcg.net/market.php';
+const API_HISTORY_BASE = 'https://member.starcg.net/marketrecord.php';
 const MAX_PAGES = 20;
 
 let allMarketItems = [];
@@ -972,9 +972,8 @@ async function searchMarket() {
         }
     } catch (err) {
         console.error(err);
-        alert('搜尋失敗！請先點右上角連結開通 CORS 權限');
-        window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
-        showEmpty('請開通權限後重試');
+        alert('搜尋失敗，請稍後再試或檢查網路連線');
+        showEmpty('搜尋失敗');
     } finally {
         showLoading(false);
     }
@@ -986,7 +985,8 @@ async function fetchMarketData(keyword) {
     let hasMore = true;
     
     while (hasMore && page <= MAX_PAGES) {
-        const url = `${API_MARKET}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const targetUrl = `${API_MARKET_BASE}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const url = CORS_PROXY + encodeURIComponent(targetUrl);
         const resp = await fetch(url);
         const data = await resp.json();
         
@@ -1096,9 +1096,8 @@ async function searchHistory() {
         }
     } catch (err) {
         console.error(err);
-        alert('搜尋失敗！請先點右上角連結開通 CORS 權限');
-        window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
-        showEmpty('請開通權限後重試');
+        alert('搜尋失敗，請稍後再試或檢查網路連線');
+        showEmpty('搜尋失敗');
     } finally {
         showLoading(false);
     }
@@ -1112,7 +1111,8 @@ async function fetchHistoryData(keyword) {
     let keepFetching = true;
     
     while (keepFetching && page <= 100) {
-        const url = `${API_HISTORY}?ajax=1&type=all&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const targetUrl = `${API_HISTORY_BASE}?ajax=1&type=all&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const url = CORS_PROXY + encodeURIComponent(targetUrl);
         const resp = await fetch(url);
         const data = await resp.json();
         
