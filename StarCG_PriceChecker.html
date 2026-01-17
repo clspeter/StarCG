@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星詠魔力 - 市場查價器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #f5f0e8;
+            --bg-card: #fffbf5;
+            --bg-card-hover: #fff8ec;
+            --border: #e0d5c5;
+            --text-primary: #4a3f35;
+            --text-secondary: #8b7355;
+            --accent-gold: #d4a024;
+            --accent-blue: #5b8cb8;
+            --accent-green: #5a9a5a;
+            --accent-red: #c75050;
+            --accent-purple: #9068b0;
+            --server-1: #d35d5d;
+            --server-2: #5a9a5a;
+            --server-3: #5b8cb8;
+            --shadow: 0 4px 16px rgba(74,63,53,0.12);
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #b8860b, #8b4513);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .badge {
+            background: var(--accent-purple);
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Search Panel */
+        .search-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group.grow {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #b48a61, #8b6b4a);
+            border: none;
+            border-radius: var(--radius);
+            padding: 12px 24px;
+            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139,107,74,0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        button.secondary {
+            background: #fff;
+            border: 2px solid #b48a61;
+            color: #6b4c2a;
+        }
+
+        button.secondary:hover {
+            background: #f5e6d3;
+            border-color: #8b6b4a;
+            box-shadow: none;
+        }
+
+        /* Quick Tags */
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .quick-tag {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .quick-tag:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        .quick-tag .remove {
+            color: var(--accent-red);
+            font-weight: bold;
+            opacity: 0.6;
+        }
+
+        .quick-tag .remove:hover {
+            opacity: 1;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .stat-card .value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .stat-card .value.gold { color: var(--accent-gold); }
+        .stat-card .value.green { color: var(--accent-green); }
+        .stat-card .value.blue { color: var(--accent-blue); }
+        .stat-card .value.red { color: var(--accent-red); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+            background: var(--bg-card);
+            padding: 4px;
+            border-radius: var(--radius);
+            width: fit-content;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: #b48a61;
+            color: #fff;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background: var(--bg-dark);
+            padding: 14px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            color: var(--accent-blue);
+        }
+
+        th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        th .sort-icon.active {
+            opacity: 1;
+            color: var(--accent-gold);
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 1rem;
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Server Badge */
+        .server-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-right: 6px;
+        }
+
+        .server-badge.s1 { background: var(--server-1); color: #fff; }
+        .server-badge.s2 { background: var(--server-2); color: #fff; }
+        .server-badge.s3 { background: var(--server-3); color: #fff; }
+
+        /* 改造圖等級標籤 */
+        .grade-normal {
+            background: #D2691E;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .grade-silver {
+            background: #808080;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .grade-gold {
+            background: #DAA520;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 8px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        /* Price Display */
+        .price {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+        }
+
+        .price.coin { color: var(--accent-gold); }
+        .price.crystal { color: var(--accent-purple); }
+
+        .converted {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-left: 8px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .loading .spinner {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* History Summary */
+        .history-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .summary-card h3 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-row .label {
+            color: var(--text-secondary);
+        }
+
+        .summary-row .value {
+            font-weight: 600;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .search-row {
+                flex-direction: column;
+            }
+
+            .form-group.grow {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs {
+                width: 100%;
+            }
+
+            .tab {
+                flex: 1;
+                text-align: center;
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        /* Highlight row */
+        .highlight {
+            animation: highlight 1.5s ease-out;
+        }
+
+        @keyframes highlight {
+            0% { background: rgba(180, 138, 97, 0.3); }
+            100% { background: transparent; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>⭐ 星詠魔力 市場查價器</h1>
+        <span class="badge">v2.0</span>
+        <a href="https://cors-anywhere.herokuapp.com/corsdemo" target="_blank" 
+           style="margin-left:auto; color:var(--accent-gold); font-size:0.85rem; text-decoration:none;">
+            ⚠️ 首次使用請先點此開通權限
+        </a>
+    </div>
+
+    <!-- Search Panel -->
+    <div class="search-panel">
+        <div class="search-row">
+            <div class="form-group grow">
+                <label>🔍 搜尋物品/寵物名稱</label>
+                <input type="text" id="searchInput" placeholder="輸入名稱關鍵字...">
+            </div>
+            <div class="form-group">
+                <label>💰 幣種</label>
+                <select id="currencyFilter">
+                    <option value="all">全部</option>
+                    <option value="0" selected>魔幣 💰</option>
+                    <option value="1">魔晶 💎</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>🖥️ 分流</label>
+                <select id="serverFilter">
+                    <option value="all" selected>全部</option>
+                    <option value="1">S1</option>
+                    <option value="2">S2</option>
+                    <option value="3">S3</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>🛡️ 耐久</label>
+                <select id="durabilityFilter">
+                    <option value="full" selected>耐久滿</option>
+                    <option value="all">全部</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>💱 匯率 (魔幣:魔晶)</label>
+                <input type="number" id="exchangeRate" value="300" min="1" style="width:80px;">
+            </div>
+            <div class="form-group">
+                <button id="searchBtn">🔍 搜尋市場</button>
+            </div>
+            <div class="form-group">
+                <button id="historyBtn" class="secondary">📈 24H歷史成交</button>
+            </div>
+        </div>
+
+        <!-- Quick Tags -->
+        <div class="quick-tags" id="quickTags"></div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="statsGrid" style="display: none;">
+        <div class="stat-card">
+            <div class="label">📦 在售數量</div>
+            <div class="value blue" id="statCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">💰 最低價</div>
+            <div class="value green" id="statMinPrice">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">📊 中位價</div>
+            <div class="value gold" id="statAvgPrice">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">📈 最高價</div>
+            <div class="value red" id="statMaxPrice">-</div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabsContainer" style="display: none;">
+        <div class="tab active" data-tab="market">🏪 市場攤位</div>
+        <div class="tab" data-tab="history">📜 歷史成交</div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading" style="display: none;">
+        <div class="spinner"></div>
+        <div>正在載入資料...</div>
+    </div>
+
+    <!-- Market Table -->
+    <div class="table-container" id="marketSection" style="display: none;">
+        <div class="table-scroll">
+            <table id="marketTable">
+                <thead>
+                    <tr>
+                        <th data-sort="item">物品名稱</th>
+                        <th data-sort="price">價格 <span class="sort-icon active">▲</span></th>
+                        <th>分流/地點</th>
+                        <th>攤位名稱</th>
+                        <th data-sort="durability">耐久</th>
+                        <th data-sort="attack">攻擊</th>
+                        <th data-sort="defence">防禦</th>
+                        <th data-sort="agility">敏捷</th>
+                        <th>數量</th>
+                    </tr>
+                </thead>
+                <tbody id="marketBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- History Section -->
+    <div id="historySection" style="display: none;">
+        <div class="history-summary" id="historySummary"></div>
+        
+        <div class="table-container">
+            <div class="table-scroll">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>物品名稱</th>
+                            <th>💰 最低</th>
+                            <th>💰 中位</th>
+                            <th>💰 最高</th>
+                            <th>💎 最低</th>
+                            <th>💎 中位</th>
+                            <th>💎 最高</th>
+                            <th>成交數</th>
+                            <th>走勢</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="chart-container" id="chartContainer" style="display: none;">
+            <div class="chart-title">📈 價格走勢圖 - <span id="chartItemName"></span></div>
+            <div class="chart-wrapper">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+        <div class="icon">🔍</div>
+        <div>輸入物品名稱開始搜尋</div>
+        <div style="margin-top: 8px; font-size: 0.85rem;">支援模糊搜尋，例如：面包、壽喜、轉蛋</div>
+    </div>
+</div>
+
+<script>
+/* ========================================
+   全域變數
+======================================== */
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+const API_MARKET = CORS_PROXY + 'https://member.starcg.net/market.php';
+const API_HISTORY = CORS_PROXY + 'https://member.starcg.net/marketrecord.php';
+const MAX_PAGES = 20;
+
+let allMarketItems = [];
+let allHistoryLogs = [];
+let quickTags = JSON.parse(localStorage.getItem('starcg_quickTags')) || ['一箱面包', '一箱法國面包', '一箱壽喜鍋'];
+let currentSort = { field: 'price', order: 'asc' };
+let priceChartInstance = null;
+let currentTab = 'market';
+
+/* ========================================
+   初始化
+======================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    renderQuickTags();
+    initEventListeners();
+});
+
+function initEventListeners() {
+    // 搜尋按鈕
+    document.getElementById('searchBtn').addEventListener('click', searchMarket);
+    document.getElementById('historyBtn').addEventListener('click', searchHistory);
+    
+    // Enter 鍵搜尋
+    document.getElementById('searchInput').addEventListener('keypress', e => {
+        if (e.key === 'Enter') searchMarket();
+    });
+    
+    // 篩選器變更
+    ['currencyFilter', 'serverFilter', 'durabilityFilter'].forEach(id => {
+        document.getElementById(id).addEventListener('change', applyFilters);
+    });
+    
+    // 匯率變更時重新渲染
+    document.getElementById('exchangeRate').addEventListener('input', applyFilters);
+    
+    // Tab 切換
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+    });
+    
+    // 表頭排序
+    document.querySelectorAll('#marketTable th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => sortTable(th.dataset.sort));
+    });
+}
+
+/* ========================================
+   快速標籤
+======================================== */
+function renderQuickTags() {
+    const container = document.getElementById('quickTags');
+    container.innerHTML = quickTags.map((tag, i) => `
+        <div class="quick-tag" onclick="quickSearch('${tag}')">
+            ${tag}
+            <span class="remove" onclick="event.stopPropagation(); removeTag(${i})">✕</span>
+        </div>
+    `).join('');
+}
+
+function quickSearch(tag) {
+    document.getElementById('searchInput').value = tag;
+    searchMarket();
+}
+
+function removeTag(index) {
+    quickTags.splice(index, 1);
+    localStorage.setItem('starcg_quickTags', JSON.stringify(quickTags));
+    renderQuickTags();
+}
+
+function addTag(tag) {
+    if (tag && !quickTags.includes(tag)) {
+        quickTags.push(tag);
+        localStorage.setItem('starcg_quickTags', JSON.stringify(quickTags));
+        renderQuickTags();
+    }
+}
+
+/* ========================================
+   市場搜尋
+======================================== */
+async function searchMarket() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    if (!keyword) return alert('請輸入搜尋關鍵字');
+    
+    showLoading(true);
+    hideAll();
+    
+    try {
+        allMarketItems = await fetchMarketData(keyword);
+        
+        if (allMarketItems.length > 0) {
+            addTag(keyword);
+            document.getElementById('tabsContainer').style.display = 'flex';
+            switchTab('market');
+            applyFilters();
+        } else {
+            showEmpty('找不到符合的物品');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('搜尋失敗！請先點右上角連結開通 CORS 權限');
+        window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+        showEmpty('請開通權限後重試');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function fetchMarketData(keyword) {
+    const items = [];
+    let page = 1;
+    let hasMore = true;
+    
+    while (hasMore && page <= MAX_PAGES) {
+        const url = `${API_MARKET}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        
+        if (data.totalFiltered === 0) break;
+        if (data.totalFiltered > 300) {
+            alert('結果太多，請輸入更精確的關鍵字');
+            return [];
+        }
+        
+        // 處理攤位資料
+        const itemsMap = data.itemsByCd || {};
+        const petsMap = data.petsByCd || {};
+        
+        (data.stalls || []).forEach(stall => {
+            const cdkey = stall.cdkey;
+            
+            // 道具
+            (itemsMap[cdkey] || []).forEach(item => {
+                if (item.ITEM_TRUENAME.includes(keyword)) {
+                    // Debug: 顯示改造圖的完整資料結構
+                    if (item.ITEM_TRUENAME.includes('改造圖')) {
+                        console.log('【改造圖原始資料】', JSON.stringify(item, null, 2));
+                    }
+                    
+                    // 處理改造圖等級區分（嘗試多種可能的欄位名）
+                    let displayName = item.ITEM_TRUENAME;
+                    let gradeTag = '';
+                    const itemLevel = item.ITEM_LEVEL || item.level || item.Level || item.ITEM_LV || item.lv || 0;
+                    if (item.ITEM_TRUENAME.includes('改造圖') && itemLevel > 0) {
+                        if (itemLevel === 5) gradeTag = '<span class="grade-normal">[普通]</span>';
+                        else if (itemLevel === 6) gradeTag = '<span class="grade-silver">[銀]</span>';
+                        else if (itemLevel === 7) gradeTag = '<span class="grade-gold">[金]</span>';
+                        else gradeTag = `<span class="grade-normal">[Lv${itemLevel}]</span>`;
+                    }
+                    
+                    items.push({
+                        item: displayName,
+                        gradeTag: gradeTag,
+                        itemLevel: itemLevel,
+                        price: item.price,
+                        pricetype: item.pricetype,
+                        durability: `${item.ITEM_DURABILITY}/${item.ITEM_MAXDURABILITY}`,
+                        durCurrent: item.ITEM_DURABILITY,
+                        durMax: item.ITEM_MAXDURABILITY,
+                        attack: Math.max(item.ITEM_ADM || 0, item.ITEM_MODIFYATTACK || 0),
+                        defence: item.ITEM_MODIFYDEFENCE || 0,
+                        agility: item.ITEM_MODIFYAGILITY || 0,
+                        location: stall.coords,
+                        server: stall.server,
+                        shopName: stall.name,
+                        count: item.ITEM_REMAIN,
+                        isPet: false
+                    });
+                }
+            });
+            
+            // 寵物
+            (petsMap[cdkey] || []).forEach(pet => {
+                if (pet.Name.includes(keyword)) {
+                    items.push({
+                        item: `${pet.Name} (寵物)`,
+                        price: pet.price,
+                        pricetype: pet.pricetype,
+                        durability: '-',
+                        durCurrent: 0,
+                        durMax: 0,
+                        attack: 0,
+                        defence: 0,
+                        agility: 0,
+                        location: stall.coords,
+                        server: stall.server,
+                        shopName: stall.name,
+                        count: 1,
+                        isPet: true
+                    });
+                }
+            });
+        });
+        
+        if (page * (data.perPage || 20) >= data.totalFiltered) hasMore = false;
+        page++;
+    }
+    
+    return items;
+}
+
+/* ========================================
+   歷史成交搜尋
+======================================== */
+async function searchHistory() {
+    const keyword = document.getElementById('searchInput').value.trim();
+    if (!keyword) return alert('請輸入搜尋關鍵字');
+    
+    showLoading(true);
+    hideAll();
+    
+    try {
+        allHistoryLogs = await fetchHistoryData(keyword);
+        
+        if (allHistoryLogs.length > 0) {
+            addTag(keyword);
+            document.getElementById('tabsContainer').style.display = 'flex';
+            switchTab('history');
+            renderHistoryData();
+        } else {
+            showEmpty('找不到歷史成交記錄');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('搜尋失敗！請先點右上角連結開通 CORS 權限');
+        window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+        showEmpty('請開通權限後重試');
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function fetchHistoryData(keyword) {
+    const logs = [];
+    const TIME_RANGE = 24 * 60 * 60 * 1000; // 24小時
+    const now = Date.now();
+    let page = 1;
+    let keepFetching = true;
+    
+    while (keepFetching && page <= 100) {
+        const url = `${API_HISTORY}?ajax=1&type=all&page=${page}&search=${encodeURIComponent(keyword)}`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        
+        if (!data.logs || data.logs.length === 0) break;
+        
+        for (const log of data.logs) {
+            const logTime = new Date(log.time_text).getTime();
+            if (now - logTime > TIME_RANGE) {
+                keepFetching = false;
+                break;
+            }
+            
+            // Debug: 顯示改造圖的歷史成交原始資料
+            if (log.buff && log.buff.includes('改造圖')) {
+                console.log('【改造圖歷史成交原始資料】', JSON.stringify(log, null, 2));
+            }
+            
+            // 解析物品名稱
+            const parts = log.buff.split('：');
+            const itemName = parts.length > 1 ? parts[1] : parts[0];
+            
+            // 還原售價（扣除 10% 手續費）
+            const originalPrice = Math.ceil(log.price / (log.pricetype === 1 ? 0.94 : 0.9));
+            
+            logs.push({
+                item: itemName,
+                price: originalPrice,
+                pricetype: log.pricetype,
+                time: log.time_text
+            });
+        }
+        
+        page++;
+    }
+    
+    return logs;
+}
+
+/* ========================================
+   篩選與排序
+======================================== */
+function applyFilters() {
+    const currency = document.getElementById('currencyFilter').value;
+    const server = document.getElementById('serverFilter').value;
+    const durability = document.getElementById('durabilityFilter').value;
+    
+    let filtered = [...allMarketItems];
+    
+    // 幣種篩選
+    if (currency !== 'all') {
+        filtered = filtered.filter(i => i.pricetype.toString() === currency);
+    }
+    
+    // 分流篩選
+    if (server !== 'all') {
+        filtered = filtered.filter(i => i.server.toString() === server);
+    }
+    
+    // 耐久篩選
+    if (durability === 'full') {
+        filtered = filtered.filter(i => i.isPet || i.durCurrent === i.durMax);
+    }
+    
+    // 排序
+    filtered = sortItems(filtered);
+    
+    // 更新統計
+    updateStats(filtered);
+    
+    // 渲染表格
+    renderMarketTable(filtered);
+}
+
+function sortItems(items) {
+    const { field, order } = currentSort;
+    
+    return [...items].sort((a, b) => {
+        let valA = a[field];
+        let valB = b[field];
+        
+        // 耐久特殊處理
+        if (field === 'durability') {
+            valA = a.durCurrent;
+            valB = b.durCurrent;
+        }
+        
+        if (typeof valA === 'string') {
+            return order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        }
+        return order === 'asc' ? valA - valB : valB - valA;
+    });
+}
+
+function sortTable(field) {
+    if (currentSort.field === field) {
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort = { field, order: 'asc' };
+    }
+    
+    // 更新排序圖示
+    document.querySelectorAll('#marketTable th .sort-icon').forEach(icon => {
+        icon.classList.remove('active');
+        icon.textContent = '▲';
+    });
+    
+    const th = document.querySelector(`#marketTable th[data-sort="${field}"]`);
+    if (th) {
+        const icon = th.querySelector('.sort-icon') || document.createElement('span');
+        icon.className = 'sort-icon active';
+        icon.textContent = currentSort.order === 'asc' ? '▲' : '▼';
+        if (!th.querySelector('.sort-icon')) th.appendChild(icon);
+    }
+    
+    applyFilters();
+}
+
+/* ========================================
+   渲染
+======================================== */
+function renderMarketTable(items) {
+    const tbody = document.getElementById('marketBody');
+    
+    if (items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-secondary);">無符合條件的物品</td></tr>';
+        document.getElementById('marketSection').style.display = 'block';
+        return;
+    }
+    
+    // 合併相同物品
+    const merged = {};
+    items.forEach(item => {
+        const key = `${item.item}-${item.price}-${item.server}-${item.durability}-${item.attack}-${item.defence}-${item.agility}`;
+        if (!merged[key]) {
+            merged[key] = { ...item };
+        } else {
+            merged[key].count += item.count;
+        }
+    });
+    
+    const rate = parseInt(document.getElementById('exchangeRate').value) || 300;
+    
+    tbody.innerHTML = Object.values(merged).map(item => {
+        // 計算換算價格
+        let converted = '';
+        if (item.pricetype === 0) {
+            // 魔幣換算成魔晶
+            const crystalVal = Math.round(item.price / rate);
+            converted = `<span class="converted">(~${crystalVal.toLocaleString()}💎)</span>`;
+        } else {
+            // 魔晶換算成魔幣
+            const coinVal = Math.round(item.price * rate);
+            converted = `<span class="converted">(~${coinVal.toLocaleString()}💰)</span>`;
+        }
+        
+        return `
+        <tr>
+            <td><strong>${escapeHtml(item.item)}</strong> ${item.gradeTag || ''}</td>
+            <td>
+                <span class="price ${item.pricetype === 0 ? 'coin' : 'crystal'}">
+                    ${item.pricetype === 0 ? '💰' : '💎'} ${item.price.toLocaleString()}
+                </span>
+                ${converted}
+            </td>
+            <td>
+                <span class="server-badge s${item.server}">S${item.server}</span>
+                ${escapeHtml(item.location)}
+            </td>
+            <td>${escapeHtml(item.shopName)}</td>
+            <td>${item.durability}</td>
+            <td>${item.attack || '-'}</td>
+            <td>${item.defence || '-'}</td>
+            <td>${item.agility || '-'}</td>
+            <td>${item.count}</td>
+        </tr>`;
+    }).join('');
+    
+    document.getElementById('marketSection').style.display = 'block';
+}
+
+function renderHistoryData() {
+    // 按物品分組統計
+    const grouped = {};
+    
+    allHistoryLogs.forEach(log => {
+        if (!grouped[log.item]) {
+            grouped[log.item] = { coins: [], crystals: [], total: 0 };
+        }
+        if (log.pricetype === 0) {
+            grouped[log.item].coins.push(log.price);
+        } else {
+            grouped[log.item].crystals.push(log.price);
+        }
+        grouped[log.item].total++;
+    });
+    
+    // 計算統計
+    const stats = Object.entries(grouped).map(([item, data]) => ({
+        item,
+        minCoin: data.coins.length ? Math.min(...data.coins) : 0,
+        maxCoin: data.coins.length ? Math.max(...data.coins) : 0,
+        avgCoin: data.coins.length ? calcTrimmedAvg(data.coins) : 0,
+        minCrystal: data.crystals.length ? Math.min(...data.crystals) : 0,
+        maxCrystal: data.crystals.length ? Math.max(...data.crystals) : 0,
+        avgCrystal: data.crystals.length ? calcTrimmedAvg(data.crystals) : 0,
+        total: data.total
+    }));
+    
+    // 渲染表格
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = stats.map(row => `
+        <tr>
+            <td><strong>${escapeHtml(row.item)}</strong></td>
+            <td style="color:var(--accent-green)">${row.minCoin ? row.minCoin.toLocaleString() : '-'}</td>
+            <td style="color:var(--accent-gold)">${row.avgCoin ? row.avgCoin.toLocaleString() : '-'}</td>
+            <td style="color:var(--accent-red)">${row.maxCoin ? row.maxCoin.toLocaleString() : '-'}</td>
+            <td style="color:var(--accent-green)">${row.minCrystal ? row.minCrystal.toLocaleString() : '-'}</td>
+            <td style="color:var(--accent-gold)">${row.avgCrystal ? row.avgCrystal.toLocaleString() : '-'}</td>
+            <td style="color:var(--accent-red)">${row.maxCrystal ? row.maxCrystal.toLocaleString() : '-'}</td>
+            <td>${row.total}</td>
+            <td><button class="secondary" style="padding:6px 12px;font-size:0.8rem;" onclick="showChart('${escapeHtml(row.item)}')">📈</button></td>
+        </tr>
+    `).join('');
+    
+    document.getElementById('historySection').style.display = 'block';
+}
+
+function showChart(itemName) {
+    const container = document.getElementById('chartContainer');
+    document.getElementById('chartItemName').textContent = itemName;
+    
+    // 篩選該物品的資料
+    const itemLogs = allHistoryLogs.filter(l => l.item === itemName);
+    const coinData = itemLogs.filter(l => l.pricetype === 0).sort((a, b) => new Date(a.time) - new Date(b.time));
+    const crystalData = itemLogs.filter(l => l.pricetype === 1).sort((a, b) => new Date(a.time) - new Date(b.time));
+    
+    // 銷毀舊圖表
+    if (priceChartInstance) {
+        priceChartInstance.destroy();
+    }
+    
+    // 建立新圖表
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    
+    const datasets = [];
+    if (coinData.length > 0) {
+        datasets.push({
+            label: '魔幣 💰',
+            data: coinData.map(d => ({ x: d.time, y: d.price })),
+            borderColor: '#d4a024',
+            backgroundColor: 'rgba(212, 160, 36, 0.15)',
+            tension: 0.3,
+            pointRadius: 4,
+            borderWidth: 2,
+            fill: true
+        });
+    }
+    if (crystalData.length > 0) {
+        datasets.push({
+            label: '魔晶 💎',
+            data: crystalData.map(d => ({ x: d.time, y: d.price })),
+            borderColor: '#9068b0',
+            backgroundColor: 'rgba(144, 104, 176, 0.15)',
+            tension: 0.3,
+            pointRadius: 4,
+            borderWidth: 2,
+            fill: true
+        });
+    }
+    
+    priceChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    labels: { color: '#4a3f35' }
+                },
+                tooltip: {
+                    backgroundColor: '#fffbf5',
+                    borderColor: '#e0d5c5',
+                    borderWidth: 1,
+                    titleColor: '#4a3f35',
+                    bodyColor: '#8b7355'
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    labels: [...new Set([...coinData, ...crystalData].map(d => d.time.split(' ')[0]))],
+                    ticks: { color: '#8b7355' },
+                    grid: { color: '#e0d5c5' }
+                },
+                y: {
+                    ticks: { color: '#8b7355' },
+                    grid: { color: '#e0d5c5' }
+                }
+            }
+        }
+    });
+    
+    container.style.display = 'block';
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateStats(items) {
+    const currency = document.getElementById('currencyFilter').value;
+    const priceType = currency === '1' ? 1 : 0;
+    
+    const prices = items
+        .filter(i => currency === 'all' || i.pricetype === priceType)
+        .map(i => i.price);
+    
+    const totalCount = items.reduce((sum, i) => sum + i.count, 0);
+    
+    document.getElementById('statCount').textContent = totalCount.toLocaleString();
+    document.getElementById('statMinPrice').textContent = prices.length ? Math.min(...prices).toLocaleString() : '-';
+    document.getElementById('statMaxPrice').textContent = prices.length ? Math.max(...prices).toLocaleString() : '-';
+    document.getElementById('statAvgPrice').textContent = prices.length ? calcTrimmedAvg(prices).toLocaleString() : '-';
+    
+    document.getElementById('statsGrid').style.display = 'grid';
+}
+
+/* ========================================
+   UI 輔助
+======================================== */
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    
+    document.getElementById('marketSection').style.display = tab === 'market' ? 'block' : 'none';
+    document.getElementById('historySection').style.display = tab === 'history' ? 'block' : 'none';
+    document.getElementById('statsGrid').style.display = tab === 'market' ? 'grid' : 'none';
+}
+
+function showLoading(show) {
+    document.getElementById('loading').style.display = show ? 'block' : 'none';
+}
+
+function hideAll() {
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('marketSection').style.display = 'none';
+    document.getElementById('historySection').style.display = 'none';
+    document.getElementById('statsGrid').style.display = 'none';
+    document.getElementById('chartContainer').style.display = 'none';
+}
+
+function showEmpty(msg) {
+    document.getElementById('emptyState').innerHTML = `
+        <div class="icon">😢</div>
+        <div>${msg}</div>
+    `;
+    document.getElementById('emptyState').style.display = 'block';
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function calcTrimmedAvg(arr) {
+    if (!arr.length) return 0;
+    if (arr.length <= 2) {
+        return Math.floor(arr.reduce((a, b) => a + b, 0) / arr.length);
+    }
+    const sorted = [...arr].sort((a, b) => a - b);
+    const start = Math.floor(sorted.length * 0.1);
+    const end = Math.ceil(sorted.length * 0.9);
+    const trimmed = sorted.slice(start, end);
+    return Math.floor(trimmed.reduce((a, b) => a + b, 0) / trimmed.length);
+}
+</script>
+
+</body>
+</html>
+
