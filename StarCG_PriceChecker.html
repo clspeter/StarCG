@@ -1302,14 +1302,21 @@ function renderMarketTable(items) {
         return;
     }
     
-    // 合併相同物品
+    // 合併相同物品（同攤位、同物品、同價格、同數值才合併）
     const merged = {};
     items.forEach(item => {
-        const key = `${item.item}-${item.price}-${item.server}-${item.durability}-${item.attack}-${item.defence}-${item.agility}`;
-        if (!merged[key]) {
-            merged[key] = { ...item };
+        // 寵物不合併（每隻都是獨立個體）
+        if (item.isPet) {
+            const uniqueKey = `pet-${Date.now()}-${Math.random()}`;
+            merged[uniqueKey] = { ...item };
         } else {
-            merged[key].count += item.count;
+            // 一般物品：同攤位+同物品+同價格+同數值才合併
+            const key = `${item.location}-${item.item}-${item.price}-${item.server}-${item.durability}-${item.attack}-${item.defence}-${item.agility}`;
+            if (!merged[key]) {
+                merged[key] = { ...item };
+            } else {
+                merged[key].count += item.count;
+            }
         }
     });
     
