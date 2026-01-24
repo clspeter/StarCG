@@ -397,6 +397,26 @@
             vertical-align: middle;
         }
 
+        /* 重來的種子 BP 標籤 */
+        .bp-plus {
+            background: #27ae60;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+        .bp-minus {
+            background: #e74c3c;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
         /* 寵物標籤 */
         .pet-lv {
             background: #3498db;
@@ -702,6 +722,12 @@
                 font-size: 0.7rem;
                 padding: 1px 6px;
                 margin-left: 4px;
+            }
+
+            .bp-plus, .bp-minus {
+                font-size: 0.65rem;
+                padding: 1px 4px;
+                margin-left: 2px;
             }
 
             .server-badge {
@@ -1077,9 +1103,13 @@ async function fetchMarketData(keyword) {
             // 道具
             (itemsMap[cdkey] || []).forEach(item => {
                 if (item.ITEM_TRUENAME.includes(keyword)) {
+                    // 🔧 DEBUG: 顯示道具原始資料
+                    console.log('【道具原始資料】', item.ITEM_TRUENAME, item);
+                    
                     // 處理改造圖等級區分（嘗試多種可能的欄位名）
                     let displayName = item.ITEM_TRUENAME;
                     let gradeTag = '';
+                    let seedTag = '';
                     const itemLevel = item.ITEM_LEVEL || item.level || item.Level || item.ITEM_LV || item.lv || 0;
                     if (item.ITEM_TRUENAME.includes('改造圖') && itemLevel > 0) {
                         if (itemLevel === 5) gradeTag = '<span class="grade-normal">[普通]</span>';
@@ -1088,9 +1118,22 @@ async function fetchMarketData(keyword) {
                         else gradeTag = `<span class="grade-normal">[Lv${itemLevel}]</span>`;
                     }
                     
+                    // 處理重來的種子 BP 配點顯示
+                    if (item.ITEM_TRUENAME.includes('重來的種子') && item.ITEM_ARGUMENT) {
+                        const bpNames = ['體', '力', '強', '速', '魔'];
+                        const bpValues = item.ITEM_ARGUMENT.split('|').map(Number);
+                        let bpParts = [];
+                        bpValues.forEach((val, idx) => {
+                            if (val > 0) bpParts.push(`<span class="bp-plus">+${val}${bpNames[idx]}</span>`);
+                            else if (val < 0) bpParts.push(`<span class="bp-minus">${val}${bpNames[idx]}</span>`);
+                        });
+                        if (bpParts.length > 0) seedTag = bpParts.join(' ');
+                    }
+                    
                     items.push({
                         item: displayName,
                         gradeTag: gradeTag,
+                        seedTag: seedTag,
                         itemLevel: itemLevel,
                         price: item.price,
                         pricetype: item.pricetype,
@@ -1333,8 +1376,8 @@ function renderMarketTable(items) {
             const uniqueKey = `pet-${Date.now()}-${Math.random()}`;
             merged[uniqueKey] = { ...item };
         } else {
-            // 一般物品：同攤位+同物品+同價格+同數值才合併
-            const key = `${item.location}-${item.item}-${item.price}-${item.server}-${item.durability}-${item.attack}-${item.defence}-${item.agility}`;
+            // 一般物品：同攤位+同物品+同價格+同數值+同BP配點才合併
+            const key = `${item.location}-${item.item}-${item.price}-${item.server}-${item.durability}-${item.attack}-${item.defence}-${item.agility}-${item.seedTag || ''}`;
             if (!merged[key]) {
                 merged[key] = { ...item };
             } else {
@@ -1360,7 +1403,7 @@ function renderMarketTable(items) {
         
         return `
         <tr>
-            <td><strong>${escapeHtml(item.item)}</strong> ${item.gradeTag || ''}${item.transTag || ''}</td>
+            <td><strong>${escapeHtml(item.item)}</strong> ${item.gradeTag || ''}${item.seedTag || ''}${item.transTag || ''}</td>
             <td>
                 <span class="price ${item.pricetype === 0 ? 'coin' : 'crystal'}">
                     ${item.pricetype === 0 ? '💰' : '💎'} ${item.price.toLocaleString()}
