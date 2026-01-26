@@ -838,9 +838,15 @@
                     <option value="all">全部</option>
                 </select>
             </div>
+            <div class="form-group" style="justify-content: flex-end;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="petOnlyFilter" style="width: 18px; height: 18px; cursor: pointer;">
+                    🐾 只搜尋寵物
+                </label>
+            </div>
             <div class="form-group exchange-rate-group">
                 <label>💱 匯率 (魔幣:魔晶)</label>
-                <input type="number" id="exchangeRate" value="275" min="1">
+                <input type="number" id="exchangeRate" value="260" min="1">
             </div>
             <div class="form-group">
                 <button id="searchBtn">🔍 搜尋市場</button>
@@ -983,6 +989,9 @@ function initEventListeners() {
         document.getElementById(id).addEventListener('change', applyFilters);
     });
     
+    // 只搜尋寵物 checkbox
+    document.getElementById('petOnlyFilter').addEventListener('change', applyFilters);
+    
     // 匯率變更時重新渲染
     document.getElementById('exchangeRate').addEventListener('input', applyFilters);
     
@@ -1065,10 +1074,21 @@ async function searchMarket() {
     }
 }
 
+// 標準化字串：全形括號轉半形、統一空格等
+function normalizeStr(str) {
+    return str
+        .replace(/（/g, '(')
+        .replace(/）/g, ')')
+        .replace(/【/g, '[')
+        .replace(/】/g, ']')
+        .replace(/　/g, ' ');
+}
+
 async function fetchMarketData(keyword) {
     const items = [];
     let page = 1;
     let hasMore = true;
+    const normalizedKeyword = normalizeStr(keyword);
     
     while (hasMore && page <= MAX_PAGES) {
         const targetUrl = `${API_MARKET_BASE}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
@@ -1102,32 +1122,33 @@ async function fetchMarketData(keyword) {
             
             // 道具
             (itemsMap[cdkey] || []).forEach(item => {
-                if (item.ITEM_TRUENAME.includes(keyword)) {
-                    // 🔧 DEBUG: 顯示道具原始資料
-                    console.log('【道具原始資料】', item.ITEM_TRUENAME, item);
-                    
+                const normalizedItemName = normalizeStr(item.ITEM_TRUENAME);
+                if (normalizedItemName.includes(normalizedKeyword)) {
                     // 處理改造圖等級區分（嘗試多種可能的欄位名）
                     let displayName = item.ITEM_TRUENAME;
                     let gradeTag = '';
                     let seedTag = '';
                     const itemLevel = item.ITEM_LEVEL || item.level || item.Level || item.ITEM_LV || item.lv || 0;
                     if (item.ITEM_TRUENAME.includes('改造圖') && itemLevel > 0) {
-                        if (itemLevel === 5) gradeTag = '<span class="grade-normal">[普通]</span>';
-                        else if (itemLevel === 6) gradeTag = '<span class="grade-silver">[銀]</span>';
-                        else if (itemLevel === 7) gradeTag = '<span class="grade-gold">[金]</span>';
-                        else gradeTag = `<span class="grade-normal">[Lv${itemLevel}]</span>`;
+                        if (itemLevel === 5) gradeTag = '<span class="grade-normal">普通</span>';
+                        else if (itemLevel === 6) gradeTag = '<span class="grade-silver">銀</span>';
+                        else if (itemLevel === 7) gradeTag = '<span class="grade-gold">金</span>';
+                        else gradeTag = `<span class="grade-normal">Lv${itemLevel}</span>`;
                     }
                     
                     // 處理重來的種子 BP 配點顯示
                     if (item.ITEM_TRUENAME.includes('重來的種子') && item.ITEM_ARGUMENT) {
-                        const bpNames = ['體', '力', '強', '速', '魔'];
+                        const bpNames = ['體', '攻', '防', '敏', '魔'];
                         const bpValues = item.ITEM_ARGUMENT.split('|').map(Number);
-                        let bpParts = [];
+                        let plusParts = [];
+                        let minusParts = [];
                         bpValues.forEach((val, idx) => {
-                            if (val > 0) bpParts.push(`<span class="bp-plus">+${val}${bpNames[idx]}</span>`);
-                            else if (val < 0) bpParts.push(`<span class="bp-minus">${val}${bpNames[idx]}</span>`);
+                            if (val > 0) plusParts.push(`<span class="bp-plus">+${val}${bpNames[idx]}</span>`);
+                            else if (val < 0) minusParts.push(`<span class="bp-minus">${val}${bpNames[idx]}</span>`);
                         });
-                        if (bpParts.length > 0) seedTag = bpParts.join(' ');
+                        // 固定順序：+1在前，-1在後
+                        const allParts = [...plusParts, ...minusParts];
+                        if (allParts.length > 0) seedTag = allParts.join(' ');
                     }
                     
                     items.push({
@@ -1154,7 +1175,8 @@ async function fetchMarketData(keyword) {
             
             // 寵物
             (petsMap[cdkey] || []).forEach(pet => {
-                if (pet.Name.includes(keyword)) {
+                const normalizedPetName = normalizeStr(pet.Name);
+                if (normalizedPetName.includes(normalizedKeyword)) {
                     // 寵物標籤：等級、改造、技能欄數
                     const petLv = pet.Lv || 1;
                     const trans = pet.Trans || 0;
@@ -1284,8 +1306,14 @@ function applyFilters() {
     const currency = document.getElementById('currencyFilter').value;
     const server = document.getElementById('serverFilter').value;
     const durability = document.getElementById('durabilityFilter').value;
+    const petOnly = document.getElementById('petOnlyFilter').checked;
     
     let filtered = [...allMarketItems];
+    
+    // 只搜尋寵物
+    if (petOnly) {
+        filtered = filtered.filter(i => i.isPet === true);
+    }
     
     // 幣種篩選
     if (currency !== 'all') {
@@ -1595,7 +1623,7 @@ function simplifyData(data) {
 
 function updateStats(items) {
     const currency = document.getElementById('currencyFilter').value;
-    const rate = parseInt(document.getElementById('exchangeRate').value) || 275;
+    const rate = parseInt(document.getElementById('exchangeRate').value) || 260;
     
     if (currency === 'all') {
         // 分別計算兩種幣種的數量
