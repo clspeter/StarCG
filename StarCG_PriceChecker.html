@@ -1278,18 +1278,22 @@ async function fetchHistoryData(keyword) {
                 break;
             }
             
-            // 解析物品名稱
-            const parts = log.buff.split('：');
+            // 解析物品名稱和數量（格式：「購買X個：物品名稱」或「購買X個:物品名稱」）
+            const qtyMatch = log.buff.match(/購買(\d+)個[：:]/);
+            const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+            const parts = log.buff.split(/[：:]/);
             const itemName = parts.length > 1 ? parts[1] : parts[0];
             
-            // 還原售價（扣除 10% 手續費）
-            const originalPrice = Math.ceil(log.price / (log.pricetype === 1 ? 0.94 : 0.9));
+            // 還原售價（扣除手續費）並計算單價
+            const originalTotalPrice = Math.ceil(log.price / (log.pricetype === 1 ? 0.94 : 0.9));
+            const unitPrice = Math.ceil(originalTotalPrice / quantity);
             
             logs.push({
                 item: itemName,
-                price: originalPrice,
+                price: unitPrice,
                 pricetype: log.pricetype,
-                time: log.time_text
+                time: log.time_text,
+                quantity: quantity
             });
         }
         
