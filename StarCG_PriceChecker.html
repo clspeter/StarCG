@@ -953,11 +953,45 @@
 /* ========================================
    全域變數
 ======================================== */
-// CORS 代理
-const CORS_PROXY = 'https://corsproxy.io/?';
+// CORS 代理（多個備援）
+const CORS_PROXIES = [
+    { prefix: 'https://api.codetabs.com/v1/proxy?quest=', encode: true },
+    { prefix: 'https://api.allorigins.win/raw?url=', encode: true },
+    { prefix: 'https://corsproxy.org/?', encode: true }
+];
+let currentProxyIndex = 0;
+
 const API_MARKET_BASE = 'https://member.starcg.net/market.php';
 const API_HISTORY_BASE = 'https://member.starcg.net/marketrecord.php';
 const MAX_PAGES = 20;
+
+// 嘗試 fetch，失敗則換下一個 proxy
+async function fetchWithProxy(targetUrl) {
+    let lastError;
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+        const proxyIndex = (currentProxyIndex + i) % CORS_PROXIES.length;
+        const proxy = CORS_PROXIES[proxyIndex];
+        const url = proxy.prefix + (proxy.encode ? encodeURIComponent(targetUrl) : targetUrl);
+        
+        try {
+            const resp = await fetch(url);
+            const text = await resp.text();
+            
+            // 檢查是否為錯誤回應
+            if (!resp.ok || text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
+                throw new Error(`Proxy ${proxyIndex} failed: ${resp.status}`);
+            }
+            
+            // 成功，記住這個 proxy
+            currentProxyIndex = proxyIndex;
+            return text;
+        } catch (err) {
+            console.warn(`Proxy ${proxyIndex} failed:`, err.message);
+            lastError = err;
+        }
+    }
+    throw new Error('所有代理伺服器都無法連線，請稍後再試');
+}
 
 let allMarketItems = [];
 let allHistoryLogs = [];
@@ -1092,19 +1126,7 @@ async function fetchMarketData(keyword) {
     
     while (hasMore && page <= MAX_PAGES) {
         const targetUrl = `${API_MARKET_BASE}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
-        const url = CORS_PROXY + encodeURIComponent(targetUrl);
-        const resp = await fetch(url);
-        const text = await resp.text();
-        
-        // 檢查是否為 HTML 錯誤頁（520 等）
-        if (text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
-            throw new Error('伺服器暫時無法連線，請稍後再試');
-        }
-        
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${text.substring(0, 100)}`);
-        }
-        
+        const text = await fetchWithProxy(targetUrl);
         const data = JSON.parse(text);
         
         if (data.totalFiltered === 0) break;
@@ -1254,19 +1276,7 @@ async function fetchHistoryData(keyword) {
     
     while (keepFetching && page <= 100) {
         const targetUrl = `${API_HISTORY_BASE}?ajax=1&type=all&page=${page}&search=${encodeURIComponent(keyword)}`;
-        const url = CORS_PROXY + encodeURIComponent(targetUrl);
-        const resp = await fetch(url);
-        const text = await resp.text();
-        
-        // 檢查是否為 HTML 錯誤頁（520 等）
-        if (text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
-            throw new Error('伺服器暫時無法連線，請稍後再試');
-        }
-        
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${text.substring(0, 100)}`);
-        }
-        
+        const text = await fetchWithProxy(targetUrl);
         const data = JSON.parse(text);
         
         if (!data.logs || data.logs.length === 0) break;
