@@ -792,179 +792,6 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
             50% { transform: scale(1.02); box-shadow: 0 0 15px 5px rgba(231, 76, 60, 0.4); }
         }
-
-        /* Equipment Panel */
-        .equipment-panel {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1000;
-            display: flex;
-            align-items: stretch;
-        }
-
-        .equipment-toggle {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-            padding: 16px 10px;
-            border-radius: 8px 0 0 8px;
-            background: linear-gradient(135deg, #b48a61, #8b6b4a);
-            border: none;
-            color: #fff;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: -2px 0 8px rgba(0,0,0,0.15);
-        }
-
-        .equipment-toggle:hover {
-            background: linear-gradient(135deg, #c49a71, #9b7b5a);
-        }
-
-        .equipment-content {
-            width: 0;
-            overflow: hidden;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-right: none;
-            border-radius: 8px 0 0 8px;
-            box-shadow: -4px 0 16px rgba(0,0,0,0.1);
-            transition: width 0.3s ease;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .equipment-panel.open .equipment-content {
-            width: 320px;
-        }
-
-        .equipment-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg-dark);
-        }
-
-        .equipment-header h3 {
-            margin: 0 0 12px 0;
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .equipment-filters {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .equipment-filters select,
-        .equipment-filters input {
-            padding: 8px 12px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            font-size: 0.95rem;
-        }
-
-        .equipment-list {
-            flex: 1;
-            overflow-y: auto;
-            max-height: 60vh;
-        }
-
-        .equipment-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 12px;
-            border-bottom: 1px solid var(--border);
-            transition: background 0.2s;
-        }
-
-        .equipment-item:hover {
-            background: var(--bg-card-hover);
-        }
-
-        .equipment-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .equipment-row {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .equipment-main {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .equipment-name {
-            font-weight: 500;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            flex-shrink: 0;
-        }
-
-        .equipment-level {
-            color: var(--accent-blue);
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .equipment-stats {
-            color: #8bc34a;
-            font-size: 0.75rem;
-        }
-
-        .equipment-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .equipment-actions button {
-            padding: 6px 10px;
-            font-size: 0.8rem;
-            border-radius: 4px;
-        }
-
-        .equipment-actions .btn-search {
-            background: var(--accent-blue);
-        }
-
-        .equipment-actions .btn-add {
-            background: var(--accent-green);
-            padding: 6px 8px;
-        }
-
-        .equipment-empty {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        /* Mobile responsive for equipment panel */
-        @media (max-width: 768px) {
-            .equipment-panel {
-                top: auto;
-                bottom: 20px;
-                transform: none;
-            }
-
-            .equipment-panel.open .equipment-content {
-                width: 280px;
-            }
-
-            .equipment-list {
-                max-height: 50vh;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1011,9 +838,15 @@
                     <option value="all">全部</option>
                 </select>
             </div>
+            <div class="form-group" style="justify-content: flex-end;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <input type="checkbox" id="petOnlyFilter" style="width: 18px; height: 18px; cursor: pointer;">
+                    🐾 只搜尋寵物
+                </label>
+            </div>
             <div class="form-group exchange-rate-group">
                 <label>💱 匯率 (魔幣:魔晶)</label>
-                <input type="number" id="exchangeRate" value="275" min="1">
+                <input type="number" id="exchangeRate" value="260" min="1">
             </div>
             <div class="form-group">
                 <button id="searchBtn">🔍 搜尋市場</button>
@@ -1116,431 +949,53 @@
     </div>
 </div>
 
-<!-- Equipment Panel -->
-<div class="equipment-panel" id="equipmentPanel">
-    <button class="equipment-toggle" onclick="toggleEquipmentPanel()">📦 裝備列表</button>
-    <div class="equipment-content">
-        <div class="equipment-header">
-            <h3>📦 裝備資料庫</h3>
-            <div class="equipment-filters">
-                <select id="equipmentCategoryFilter" onchange="filterEquipments()">
-                    <option value="all">全部種類</option>
-                </select>
-                <input type="text" id="equipmentSearchInput" placeholder="搜尋裝備名稱..." oninput="filterEquipments()">
-            </div>
-        </div>
-        <div class="equipment-list" id="equipmentList"></div>
-    </div>
-</div>
-
 <script>
 /* ========================================
    全域變數
 ======================================== */
-// CORS 代理
-const CORS_PROXY = 'https://corsproxy.io/?';
-
-// 裝備資料庫
-const EQUIPMENT_DATA = [
-    // 劍
-    {category:'劍',level:1,name:'長劍',stats:'攻擊+12~+24'},
-    {category:'劍',level:1,name:'闊劍',stats:'攻擊+18~+36'},
-    {category:'劍',level:2,name:'突刺劍',stats:'攻擊+26~+48'},
-    {category:'劍',level:2,name:'火舌劍',stats:'攻擊+33~+60'},
-    {category:'劍',level:3,name:'麵包劍',stats:'攻擊+43~+75'},
-    {category:'劍',level:3,name:'雙手劍',stats:'攻擊+50~+84'},
-    {category:'劍',level:4,name:'雙刃長劍',stats:'攻擊+62~+96'},
-    {category:'劍',level:4,name:'鎖刃劍',stats:'攻擊+70~+108'},
-    {category:'劍',level:5,name:'格鬥劍',stats:'攻擊+84~+120'},
-    {category:'劍',level:5,name:'長鍔劍',stats:'攻擊+92~+132'},
-    {category:'劍',level:5,name:'黑作太刀',stats:'攻擊+93~+129 敏捷+1~+5'},
-    {category:'劍',level:6,name:'豬牙劍',stats:'攻擊+108~+144'},
-    {category:'劍',level:6,name:'雙刃闊劍',stats:'攻擊+117~+156'},
-    {category:'劍',level:7,name:'巨劍',stats:'攻擊+125~+170'},
-    {category:'劍',level:7,name:'長軍刀',stats:'攻擊+135~+180'},
-    {category:'劍',level:7,name:'水龍之劍',stats:'攻擊+210 敏捷+5'},
-    {category:'劍',level:8,name:'護身短劍',stats:'攻擊+225~+230'},
-    {category:'劍',level:8,name:'細柄短劍',stats:'攻擊+153~+204'},
-    {category:'劍',level:8,name:'長軍刀+',stats:'攻擊+90~+180'},
-    {category:'劍',level:9,name:'細刃重劍',stats:'攻擊+182~+228'},
-    {category:'劍',level:9,name:'剛硬巨劍',stats:'攻擊+185'},
-    {category:'劍',level:10,name:'青龍刀',stats:'攻擊+204~+240'},
-    {category:'劍',level:10,name:'曲刀',stats:'攻擊+250 敏捷+1'},
-    {category:'劍',level:11,name:'彎勾劍',stats:'攻擊+239~+250'},
-    {category:'劍',level:11,name:'剛毅',stats:'攻擊+285~+300 閃躲+20'},
-    // 斧
-    {category:'斧',level:1,name:'手斧',stats:'攻擊+15~+29 必殺+18'},
-    {category:'斧',level:1,name:'勇氣之斧',stats:'攻擊+22~+44 必殺+18'},
-    {category:'斧',level:2,name:'寬手斧',stats:'攻擊+32~+58 必殺+18'},
-    {category:'斧',level:2,name:'戰鬥手斧',stats:'攻擊+40~+73 必殺+18'},
-    {category:'斧',level:3,name:'格鬥手斧',stats:'攻擊+52~+87 必殺+18'},
-    {category:'斧',level:3,name:'鋼斧',stats:'攻擊+61~+102 必殺+18'},
-    {category:'斧',level:4,name:'長戰斧',stats:'攻擊+75~+116 必殺+18'},
-    {category:'斧',level:4,name:'雙刃斧',stats:'攻擊+85~+131 必殺+18'},
-    {category:'斧',level:5,name:'鉤爪斧',stats:'攻擊+102~+145 必殺+18'},
-    {category:'斧',level:5,name:'闊刃斧',stats:'攻擊+112~+160 必殺+18'},
-    {category:'斧',level:5,name:'鑽保雷格之斧',stats:'攻擊+100~+168 必殺+18'},
-    {category:'斧',level:6,name:'彎月大戰斧',stats:'攻擊+131~+174 必殺+18'},
-    {category:'斧',level:6,name:'大型闊刃斧',stats:'攻擊+142~+189 必殺+18'},
-    {category:'斧',level:7,name:'大型雙刃斧',stats:'攻擊+164~+220 必殺+18'},
-    {category:'斧',level:7,name:'超大皇帝斧',stats:'攻擊+120~+145 必殺+36'},
-    {category:'斧',level:7,name:'水龍之斧',stats:'攻擊+220 防禦+25 必殺+18'},
-    {category:'斧',level:8,name:'新月斧',stats:'攻擊+174~+232 必殺+18'},
-    {category:'斧',level:8,name:'米諾陶斯戰斧',stats:'攻擊+200~+245 必殺+18'},
-    {category:'斧',level:8,name:'大型雙刃斧+',stats:'攻擊+168~+225 必殺+18'},
-    {category:'斧',level:9,name:'薄刃鉤爪斧',stats:'攻擊+221~+276 必殺+18'},
-    {category:'斧',level:9,name:'彎月長柄斧',stats:'攻擊+221~+276 必殺+21'},
-    {category:'斧',level:10,name:'金屬重斧',stats:'攻擊+259~+305 必殺+18'},
-    {category:'斧',level:10,name:'處刑斧',stats:'攻擊+305~+310 必殺+18'},
-    {category:'斧',level:11,name:'高速斧',stats:'攻擊+230~+249 必殺+12'},
-    {category:'斧',level:11,name:'重擊斧',stats:'攻擊+295~+331 必殺+36'},
-    // 槍
-    {category:'槍',level:1,name:'短矛',stats:'攻擊+10~+20 反擊+6'},
-    {category:'槍',level:1,name:'攻城槍',stats:'攻擊+15~+30 反擊+6'},
-    {category:'槍',level:2,name:'刺槍',stats:'攻擊+22~+40 反擊+6'},
-    {category:'槍',level:2,name:'金屬槍',stats:'攻擊+28~+50 反擊+6'},
-    {category:'槍',level:3,name:'長柄彎槍',stats:'攻擊+36~+60 反擊+6'},
-    {category:'槍',level:3,name:'長柄尖槍',stats:'攻擊+42~+70 反擊+6'},
-    {category:'槍',level:4,name:'穗槍',stats:'攻擊+52~+80 反擊+6'},
-    {category:'槍',level:4,name:'雙叉戟',stats:'攻擊+59~+90 反擊+6'},
-    {category:'槍',level:5,name:'護衛槍',stats:'攻擊+70~+100 反擊+6'},
-    {category:'槍',level:5,name:'騎士槍',stats:'攻擊+77~+110 反擊+6'},
-    {category:'槍',level:5,name:'偃月刀',stats:'攻擊+87~+126 防禦+1~+5 反擊+8'},
-    {category:'槍',level:6,name:'大砍槍',stats:'攻擊+90~+120 反擊+6'},
-    {category:'槍',level:6,name:'長尖槍',stats:'攻擊+98~+130 反擊+6'},
-    {category:'槍',level:7,name:'蠍槍',stats:'攻擊+105~+140 反擊+6'},
-    {category:'槍',level:7,name:'雙刃槍',stats:'攻擊+120~+125 反擊+12'},
-    {category:'槍',level:7,name:'水龍之槍',stats:'攻擊+140 敏捷+50 必殺+12'},
-    {category:'槍',level:8,name:'闊刃槍',stats:'攻擊+120~+160 反擊+6'},
-    {category:'槍',level:8,name:'東方長刺鎗',stats:'攻擊+140 反擊+6'},
-    {category:'槍',level:8,name:'蠍槍+',stats:'攻擊+110~+148 反擊+5~+7'},
-    {category:'槍',level:9,name:'鉤爪槍',stats:'攻擊+152~+190 反擊+6'},
-    {category:'槍',level:9,name:'原始槍',stats:'攻擊+180~+190 反擊+9'},
-    {category:'槍',level:10,name:'三叉戰戟',stats:'攻擊+179~+210 反擊+6'},
-    {category:'槍',level:10,name:'異型槍',stats:'攻擊+225 反擊+1'},
-    {category:'槍',level:11,name:'痛擊槍',stats:'攻擊+206~+224 必殺+8 反擊+8'},
-    {category:'槍',level:11,name:'穿刺槍',stats:'攻擊+200~+252 命中+15'},
-    // 弓
-    {category:'弓',level:1,name:'輕型弓',stats:'攻擊+11~+22'},
-    {category:'弓',level:1,name:'威力短弓',stats:'攻擊+17~+33'},
-    {category:'弓',level:2,name:'短戰弓',stats:'攻擊+24~+44'},
-    {category:'弓',level:2,name:'獵弓',stats:'攻擊+30~+55'},
-    {category:'弓',level:3,name:'強弓',stats:'攻擊+40~+66'},
-    {category:'弓',level:3,name:'格鬥弓',stats:'攻擊+46~+77'},
-    {category:'弓',level:4,name:'狙擊弓',stats:'攻擊+57~+88'},
-    {category:'弓',level:4,name:'超強狙擊弓',stats:'攻擊+64~+99'},
-    {category:'弓',level:5,name:'殺手長弓',stats:'攻擊+77~+110'},
-    {category:'弓',level:5,name:'衝擊弓',stats:'攻擊+85~+121'},
-    {category:'弓',level:5,name:'米斯特汀之弓',stats:'攻擊+77~+122 閃躲+1~+3'},
-    {category:'弓',level:6,name:'巨弓',stats:'攻擊+99~+132'},
-    {category:'弓',level:6,name:'長格鬥弓',stats:'攻擊+107~+143'},
-    {category:'弓',level:7,name:'破邪長弓',stats:'攻擊+120~+130 命中+10 必殺+2'},
-    {category:'弓',level:7,name:'月光長弓',stats:'攻擊+123~+165'},
-    {category:'弓',level:7,name:'水龍之弓',stats:'攻擊+165 必殺+2 命中+20'},
-    {category:'弓',level:8,name:'原始石弓',stats:'攻擊+170~+187 命中+15'},
-    {category:'弓',level:8,name:'重弦弓',stats:'攻擊+140~+187'},
-    {category:'弓',level:8,name:'月光之弓+',stats:'攻擊+130~+160 命中+1~+5'},
-    {category:'弓',level:9,name:'平行弓',stats:'攻擊+167~+209'},
-    {category:'弓',level:9,name:'靈魂之弓',stats:'攻擊+165'},
-    {category:'弓',level:10,name:'摘星之弓',stats:'攻擊+196~+231'},
-    {category:'弓',level:10,name:'魔彈',stats:'攻擊+195 命中+5'},
-    {category:'弓',level:11,name:'調和之弓',stats:'攻擊+201~+219 必殺+6 閃躲+10'},
-    {category:'弓',level:11,name:'月之弓',stats:'攻擊+222~+250 防禦+30 命中+8'},
-    // 杖
-    {category:'杖',level:1,name:'短杖',stats:'精神+4~+5 魔攻+11~+14'},
-    {category:'杖',level:1,name:'權杖',stats:'攻擊+5~+10 魔攻+11~+12'},
-    {category:'杖',level:2,name:'大地之杖',stats:'精神+8~+10 魔攻+42~+48'},
-    {category:'杖',level:2,name:'激流權杖',stats:'攻擊+11~+20 魔攻+42~+45'},
-    {category:'杖',level:3,name:'魔之手杖',stats:'精神+10~+15 魔攻+73~+82'},
-    {category:'杖',level:3,name:'魔之權杖',stats:'攻擊+19~+30 魔攻+73~+77'},
-    {category:'杖',level:4,name:'賢者手杖',stats:'精神+15~+20 魔攻+104~+116'},
-    {category:'杖',level:4,name:'賢者權杖',stats:'攻擊+28~+40 魔攻+104~+110'},
-    {category:'杖',level:5,name:'琥珀杖',stats:'精神+20~+25 魔攻+135~+150'},
-    {category:'杖',level:5,name:'琥珀權杖',stats:'攻擊+37~+50 魔攻+135~+142'},
-    {category:'杖',level:5,name:'魔晶之杖',stats:'攻擊+38~+51 回復+1~+6 魔攻+135~+142'},
-    {category:'杖',level:6,name:'元素之杖',stats:'精神+24~+30 魔攻+166~+184'},
-    {category:'杖',level:6,name:'神聖之杖',stats:'攻擊+46~+60 魔攻+166~+175'},
-    {category:'杖',level:7,name:'怒音之杖',stats:'精神+28~+35 魔攻+197~+218'},
-    {category:'杖',level:7,name:'隱者之杖',stats:'攻擊+55~+70 魔攻+197~+207'},
-    {category:'杖',level:7,name:'水龍之杖',stats:'攻擊+70 精神+35 魔攻+218'},
-    {category:'杖',level:8,name:'光明短杖',stats:'精神+32~+40 魔攻+228~+252'},
-    {category:'杖',level:8,name:'惡魔之杖',stats:'攻擊+64~+80 魔攻+228~+240'},
-    {category:'杖',level:8,name:'落雷權杖+',stats:'攻擊+50~+70 精神+28~+35 魔攻+197~+208'},
-    {category:'杖',level:9,name:'太陽短杖',stats:'精神+36~+45 魔攻+259~+286'},
-    {category:'杖',level:9,name:'天使之杖',stats:'攻擊+72~+90 魔攻+259~+272'},
-    {category:'杖',level:10,name:'聖者之杖',stats:'精神+43~+50 魔攻+290~+320'},
-    {category:'杖',level:10,name:'星屑短杖',stats:'攻擊+85~+100 魔攻+290~+305'},
-    {category:'杖',level:11,name:'王者之手',stats:'精神+53~+60 閃躲+10 魔攻+300~+330'},
-    {category:'杖',level:11,name:'星錘杖',stats:'攻擊+153~+181 防禦+50 魔攻+228~+251'},
-    // 投具
-    {category:'投具',level:1,name:'木製大型回力鏢',stats:'攻擊+12~+23'},
-    {category:'投具',level:1,name:'青銅回力鏢',stats:'攻擊+18~+35'},
-    {category:'投具',level:2,name:'追跡者',stats:'攻擊+25~+46'},
-    {category:'投具',level:2,name:'彩光回力鏢',stats:'攻擊+32~+58'},
-    {category:'投具',level:3,name:'暗殺回力鏢',stats:'攻擊+41~+69'},
-    {category:'投具',level:3,name:'殺敵回力鏢',stats:'攻擊+49~+81'},
-    {category:'投具',level:4,name:'獅子回力鏢',stats:'攻擊+60~+92'},
-    {category:'投具',level:4,name:'銳角回力鏢',stats:'攻擊+68~+104'},
-    {category:'投具',level:5,name:'翼鹿回力鏢',stats:'攻擊+81~+115'},
-    {category:'投具',level:5,name:'阿修塔羅回力鏢',stats:'攻擊+89~+127'},
-    {category:'投具',level:5,name:'北斗之鎌刀',stats:'攻擊+85~+135 必殺+1~+5'},
-    {category:'投具',level:6,name:'蛇獅回力鏢',stats:'攻擊+104~+138'},
-    {category:'投具',level:6,name:'鶇回力鏢',stats:'攻擊+113~+150'},
-    {category:'投具',level:7,name:'雄翼牛回力鏢',stats:'攻擊+130~+173'},
-    {category:'投具',level:7,name:'閃光回力鏢',stats:'攻擊+130~+140 必殺+15'},
-    {category:'投具',level:7,name:'冰龍',stats:'攻擊+173 精神+10 必殺+20'},
-    {category:'投具',level:8,name:'凶豹回力鏢',stats:'攻擊+147~+196'},
-    {category:'投具',level:8,name:'赤獅回力鏢',stats:'攻擊+130~+160'},
-    {category:'投具',level:8,name:'熊翼回力鏢+',stats:'攻擊+130~+155 敏捷+10~+20'},
-    {category:'投具',level:9,name:'天使之翼',stats:'攻擊+175~+219'},
-    {category:'投具',level:9,name:'普利辛回力鏢',stats:'攻擊+220~+230'},
-    {category:'投具',level:10,name:'治癒回力鏢',stats:'攻擊+216~+242'},
-    {category:'投具',level:10,name:'天秤回力鏢',stats:'攻擊+236~+242 防禦+5'},
-    {category:'投具',level:11,name:'基盤飛鏢',stats:'攻擊+201~+221 魔力+152~+199 精神+20'},
-    {category:'投具',level:11,name:'節制飛鏢',stats:'攻擊+230~+251 命中+6 閃躲+10'},
-    // 小刀
-    {category:'小刀',level:1,name:'小刀',stats:'攻擊+9~+18 必殺+3'},
-    {category:'小刀',level:1,name:'銳刃小刀',stats:'攻擊+14~+27 必殺+3'},
-    {category:'小刀',level:2,name:'圓盤小刀',stats:'攻擊+20~+36 必殺+3'},
-    {category:'小刀',level:2,name:'細刃擲刀',stats:'攻擊+25~+45 必殺+3'},
-    {category:'小刀',level:3,name:'滑翔小刀',stats:'攻擊+32~+54 必殺+3'},
-    {category:'小刀',level:3,name:'細直刃小刀',stats:'攻擊+38~+63 必殺+3'},
-    {category:'小刀',level:4,name:'耳柄小刀',stats:'攻擊+47~+72 必殺+3'},
-    {category:'小刀',level:4,name:'騎士小刀',stats:'攻擊+53~+81 必殺+3'},
-    {category:'小刀',level:5,name:'球鍔小刀',stats:'攻擊+63~+90 必殺+3'},
-    {category:'小刀',level:5,name:'雙刃小刀',stats:'攻擊+69~+99 必殺+3'},
-    {category:'小刀',level:5,name:'忍者飛鏢',stats:'攻擊+66~+110 敏捷+1~+6 必殺+3'},
-    {category:'小刀',level:6,name:'闊刃小刀',stats:'攻擊+81~+108 必殺+3'},
-    {category:'小刀',level:6,name:'觸角小刀',stats:'攻擊+88~+117 必殺+3'},
-    {category:'小刀',level:7,name:'漢拉提小刀',stats:'攻擊+116~+126 必殺+3 命中+15'},
-    {category:'小刀',level:7,name:'兇殺刀',stats:'攻擊+101~+135 必殺+3'},
-    {category:'小刀',level:7,name:'水龍的小刀',stats:'攻擊+129 命中+25'},
-    {category:'小刀',level:8,name:'切肉小刀',stats:'攻擊+50 敏捷+15 必殺+18 命中+15 閃躲+15'},
-    {category:'小刀',level:8,name:'古傳小刀',stats:'攻擊+115~+153 必殺+3'},
-    {category:'小刀',level:8,name:'疾速短刀+',stats:'攻擊+110~+140 必殺+1~+5'},
-    {category:'小刀',level:9,name:'華麗小刀',stats:'攻擊+137~+171 必殺+3'},
-    {category:'小刀',level:9,name:'手裡劍',stats:'攻擊+117~+151 必殺+6 命中+3'},
-    {category:'小刀',level:10,name:'勾爪擲刀',stats:'攻擊+161~+189 必殺+3'},
-    {category:'小刀',level:10,name:'幻之匕首',stats:'攻擊+190~+210 必殺-3'},
-    {category:'小刀',level:11,name:'破滅刀',stats:'攻擊+190~+193 命中+10 閃躲+4'},
-    {category:'小刀',level:11,name:'兇殘刀',stats:'攻擊+186~+195 必殺+11'},
-    // 頭盔
-    {category:'頭盔',level:1,name:'硬皮頭盔',stats:'防禦+6~+11 抗魔+5~+7'},
-    {category:'頭盔',level:1,name:'銅製頭盔',stats:'防禦+9~+17 抗魔+3~+5'},
-    {category:'頭盔',level:2,name:'鐵板布盔',stats:'防禦+12~+22 抗魔+10~+14'},
-    {category:'頭盔',level:2,name:'銅鐵皮盔',stats:'防禦+15~+28 抗魔+6~+10'},
-    {category:'頭盔',level:3,name:'金屬護額',stats:'防禦+20~+33 抗魔+15~+21'},
-    {category:'頭盔',level:3,name:'鐵製頭盔',stats:'防禦+23~+39 抗魔+9~+15'},
-    {category:'頭盔',level:4,name:'霸葛頭盔',stats:'防禦+29~+44 抗魔+20~+28'},
-    {category:'頭盔',level:4,name:'角飾頭盔',stats:'防禦+33~+50 抗魔+12~+20'},
-    {category:'頭盔',level:5,name:'開放式頭盔',stats:'防禦+39~+55 抗魔+25~+35'},
-    {category:'頭盔',level:5,name:'葛理克頭盔',stats:'防禦+43~+61 抗魔+15~+25'},
-    {category:'頭盔',level:5,name:'聖騎士之盔',stats:'防禦+42~+52 抗魔+35~+39'},
-    {category:'頭盔',level:6,name:'巴比克頭盔',stats:'防禦+50~+66 抗魔+30~+42'},
-    {category:'頭盔',level:6,name:'利刃頭盔',stats:'防禦+54~+72 抗魔+18~+30'},
-    {category:'頭盔',level:7,name:'騎士頭盔',stats:'防禦+60 抗魔+28~+42'},
-    {category:'頭盔',level:7,name:'鋼製頭盔',stats:'防禦+62~+83 抗魔+24~+38'},
-    {category:'頭盔',level:7,name:'水龍之盔',stats:'防禦+110'},
-    {category:'頭盔',level:8,name:'博流蓋爾頭盔',stats:'防禦+65 閃躲+25 抗魔+10'},
-    {category:'頭盔',level:8,name:'鉚釘頭盔',stats:'防禦+71~+94 抗魔+32~+48'},
-    {category:'頭盔',level:8,name:'鋼製頭盔+',stats:'防禦+65~+85 閃躲+1~+5 抗魔+16~+32'},
-    {category:'頭盔',level:9,name:'羽毛頭盔',stats:'防禦+84~+105 抗魔+45~+63'},
-    {category:'頭盔',level:9,name:'龍盔',stats:'防禦+85 命中+3 抗魔+24~+36'},
-    {category:'頭盔',level:10,name:'白金頭盔',stats:'防禦+99~+116 抗魔+50~+70'},
-    {category:'頭盔',level:10,name:'聖龍頭盔',stats:'防禦+130 抗魔+40~+60'},
-    {category:'頭盔',level:11,name:'正義頭盔',stats:'防禦+95 必殺+6 抗魔+77~+87'},
-    {category:'頭盔',level:11,name:'靈力頭盔',stats:'防禦+105~+111 反擊+8 抗魔+74~+77'},
-    // 帽子
-    {category:'帽子',level:1,name:'麻布帽',stats:'防禦+4~+7 命中+5'},
-    {category:'帽子',level:1,name:'硬帽',stats:'防禦+6~+11 命中+5'},
-    {category:'帽子',level:2,name:'輕帽',stats:'防禦+8~+14 命中+5'},
-    {category:'帽子',level:2,name:'皮帽',stats:'防禦+10~+18 命中+5'},
-    {category:'帽子',level:3,name:'硬皮帽',stats:'防禦+13~+21 命中+5'},
-    {category:'帽子',level:3,name:'可愛的帽子',stats:'防禦+15~+25 命中+5'},
-    {category:'帽子',level:4,name:'時髦帽子',stats:'防禦+18~+28 命中+5'},
-    {category:'帽子',level:4,name:'鴨舌帽',stats:'防禦+21~+32 命中+5'},
-    {category:'帽子',level:5,name:'藍徽章之帽',stats:'防禦+25~+35 命中+5'},
-    {category:'帽子',level:5,name:'高級帽子',stats:'防禦+27~+39 命中+5'},
-    {category:'帽子',level:5,name:'劍客帽',stats:'防禦+10~+14 生命+66~+75 閃躲+3'},
-    {category:'帽子',level:6,name:'裝飾著花的帽子',stats:'防禦+32~+42 命中+5'},
-    {category:'帽子',level:6,name:'青銅帽子',stats:'防禦+35~+46 命中+5'},
-    {category:'帽子',level:7,name:'淑女帽',stats:'防禦+10 精神+20'},
-    {category:'帽子',level:7,name:'可愛的扁帽子',stats:'防禦+40~+53 命中+5'},
-    {category:'帽子',level:7,name:'水龍之帽',stats:'防禦+53 精神+20 命中+5'},
-    {category:'帽子',level:8,name:'軍帽',stats:'防禦+42~+57 命中+5'},
-    {category:'帽子',level:8,name:'時髦避暑帽',stats:'防禦+32~+46 命中+5'},
-    {category:'帽子',level:8,name:'可愛的扁帽子+',stats:'防禦+38~+45 命中+5 閃躲+1~+3'},
-    {category:'帽子',level:8,name:'頭目帽子',stats:'防禦+56 命中+5 閃躲+3'},
-    {category:'帽子',level:9,name:'羽毛帽',stats:'防禦+54~+67 命中+5'},
-    {category:'帽子',level:9,name:'魔術師之帽',stats:'防禦+5 命中+15'},
-    {category:'帽子',level:10,name:'黃昏之帽',stats:'防禦+63~+75 命中+5'},
-    {category:'帽子',level:10,name:'妖精之帽',stats:'防禦+60 命中+5 閃躲+2'},
-    {category:'帽子',level:11,name:'貝斯神帽',stats:'防禦+36~+47 閃躲+10'},
-    {category:'帽子',level:11,name:'神官帽',stats:'防禦+67~+74 命中+10'},
-    // 鎧甲
-    {category:'鎧甲',level:1,name:'軟皮甲',stats:'防禦+11~+21 抗魔+6~+8'},
-    {category:'鎧甲',level:1,name:'護心甲',stats:'防禦+16~+32 抗魔+4~+6'},
-    {category:'鎧甲',level:2,name:'青銅鎧甲',stats:'防禦+23~+42 抗魔+12~+16'},
-    {category:'鎧甲',level:2,name:'輕型鎧甲',stats:'防禦+29~+53 抗魔+8~+12'},
-    {category:'鎧甲',level:3,name:'輕型鎖鍊甲',stats:'防禦+38~+63 抗魔+18~+24'},
-    {category:'鎧甲',level:3,name:'環甲',stats:'防禦+44~+74 抗魔+12~+18'},
-    {category:'鎧甲',level:4,name:'鋼鐵鎧甲',stats:'防禦+55~+84 抗魔+24~+32'},
-    {category:'鎧甲',level:4,name:'金屬皮甲',stats:'防禦+62~+95 抗魔+16~+24'},
-    {category:'鎧甲',level:5,name:'長型金屬鎧甲',stats:'防禦+74~+105 抗魔+30~+40'},
-    {category:'鎧甲',level:5,name:'索狀鎧甲',stats:'防禦+81~+116 抗魔+20~+30'},
-    {category:'鎧甲',level:5,name:'劍齒鎧甲',stats:'防禦+100~+110 抗魔+18~+28 反擊+8'},
-    {category:'鎧甲',level:6,name:'重鐵板甲',stats:'防禦+95~+126 抗魔+36~+48'},
-    {category:'鎧甲',level:6,name:'鐵板半身甲',stats:'防禦+103~+137 抗魔+24~+36'},
-    {category:'鎧甲',level:7,name:'實戰鎧甲',stats:'防禦+110~+147 抗魔+42~+56'},
-    {category:'鎧甲',level:7,name:'黃金鎧甲',stats:'防禦+20 精神+50 抗魔+40'},
-    {category:'鎧甲',level:7,name:'水龍鎧甲',stats:'防禦+170'},
-    {category:'鎧甲',level:8,name:'重金屬鎧甲',stats:'防禦+126~+179 抗魔+48~+64'},
-    {category:'鎧甲',level:8,name:'野獸之鎧',stats:'防禦+130~+140 抗魔+16~+24'},
-    {category:'鎧甲',level:8,name:'實戰鎧甲+',stats:'防禦+115~+155 抗魔+24~+40'},
-    {category:'鎧甲',level:9,name:'帝王之鎧',stats:'防禦+160~+200 抗魔+27~+36'},
-    {category:'鎧甲',level:9,name:'亡靈鎧甲',stats:'防禦+160 閃躲+10 抗魔+12'},
-    {category:'鎧甲',level:10,name:'漆黑之鎧',stats:'防禦+188~+221 抗魔+70~+80'},
-    {category:'鎧甲',level:10,name:'騎士鎧甲',stats:'防禦+240 抗魔+50~+60'},
-    {category:'鎧甲',level:11,name:'紅繩威鎧',stats:'防禦+214~+222 命中+8 抗魔+51'},
-    {category:'鎧甲',level:11,name:'守護鎧甲',stats:'防禦+227 生命+93 抗魔+99'},
-    // 衣服
-    {category:'衣服',level:1,name:'旅人之服',stats:'防禦+7~+14 閃躲+5'},
-    {category:'衣服',level:1,name:'保護衣',stats:'防禦+11~+21 閃躲+5'},
-    {category:'衣服',level:2,name:'羽毛裝',stats:'防禦+15~+28 閃躲+5'},
-    {category:'衣服',level:2,name:'皮裝',stats:'防禦+19~+35 閃躲+5'},
-    {category:'衣服',level:3,name:'硬皮服',stats:'防禦+21~+42 閃躲+5'},
-    {category:'衣服',level:3,name:'鎖鏈裝',stats:'防禦+29~+49 閃躲+5'},
-    {category:'衣服',level:4,name:'布甲',stats:'防禦+36~+56 閃躲+5'},
-    {category:'衣服',level:4,name:'襯甲',stats:'防禦+41~+64 閃躲+5'},
-    {category:'衣服',level:5,name:'環服',stats:'防禦+49~+70 閃躲+5'},
-    {category:'衣服',level:5,name:'士兵護衣',stats:'防禦+54~+78 閃躲+5'},
-    {category:'衣服',level:5,name:'功夫裝',stats:'防禦+38~+48 抗魔+15~+18'},
-    {category:'衣服',level:6,name:'長索錐衣',stats:'防禦+63~+84 閃躲+5'},
-    {category:'衣服',level:6,name:'索錐上衣',stats:'防禦+68~+92 閃躲+5'},
-    {category:'衣服',level:7,name:'骨衣',stats:'防禦+79~+105 閃躲+5'},
-    {category:'衣服',level:7,name:'超級衣服',stats:'防禦+74~+98 閃躲+5'},
-    {category:'衣服',level:7,name:'水龍之服',stats:'防禦+30 閃躲+80'},
-    {category:'衣服',level:8,name:'疾風之衣',stats:'防禦+100~+112 命中+2 閃躲+5'},
-    {category:'衣服',level:8,name:'步兵戰衣',stats:'防禦+89~+119 閃躲+5'},
-    {category:'衣服',level:8,name:'獸骨之衣+',stats:'防禦+88~+115 敏捷+10~+20 閃躲+5'},
-    {category:'衣服',level:9,name:'勇者之衣',stats:'防禦+116~+133 閃躲+5'},
-    {category:'衣服',level:9,name:'女神之衣',stats:'防禦+95 命中+2 閃躲+15'},
-    {category:'衣服',level:10,name:'不死鳥之服',stats:'防禦+135~+147 閃躲+5'},
-    {category:'衣服',level:10,name:'靈魂之服',stats:'防禦+120 命中+2 閃躲+5'},
-    {category:'衣服',level:11,name:'海洋之服',stats:'攻擊+20 防禦+163~+181 命中+5'},
-    {category:'衣服',level:11,name:'幻想之服',stats:'防禦+90~+92 回復+10 必殺+5'},
-    // 長袍
-    {category:'長袍',level:1,name:'羽毛袍',stats:'防禦+4~+8 魔力+40~+50'},
-    {category:'長袍',level:1,name:'輕皮袍',stats:'防禦+6~+12 魔力+60~+75'},
-    {category:'長袍',level:2,name:'網袍',stats:'防禦+9~+16 魔力+80~+100'},
-    {category:'長袍',level:2,name:'風袍',stats:'防禦+11~+20 魔力+100~+125'},
-    {category:'長袍',level:3,name:'硬皮袍',stats:'防禦+14~+24 魔力+120~+150'},
-    {category:'長袍',level:3,name:'環袍',stats:'防禦+17~+28 魔力+140~+175'},
-    {category:'長袍',level:4,name:'烏鴉之袍',stats:'防禦+21~+32 魔力+160~+200'},
-    {category:'長袍',level:4,name:'月亮之袍',stats:'防禦+23~+36 魔力+180~+225'},
-    {category:'長袍',level:4,name:'狐皮披風',stats:'防禦+17~+22 敏捷+7~+12 魔力+47~+59'},
-    {category:'長袍',level:5,name:'東方法衣',stats:'防禦+28~+40 魔力+200~+250'},
-    {category:'長袍',level:5,name:'聖堂之袍',stats:'防禦+31~+44 魔力+220~+275'},
-    {category:'長袍',level:5,name:'治癒之袍',stats:'防禦+68~+75 魔力+151~+174 回復+8'},
-    {category:'長袍',level:6,name:'聖者之袍',stats:'防禦+36~+48 魔力+240~+300'},
-    {category:'長袍',level:6,name:'戰鬥長袍',stats:'防禦+39~+52 魔力+260~+325'},
-    {category:'長袍',level:7,name:'冠軍之袍',stats:'防禦+42~+56'},
-    {category:'長袍',level:7,name:'時之袍',stats:'防禦+45~+60 魔力+300~+375'},
-    {category:'長袍',level:7,name:'水龍法袍',stats:'防禦+70 魔力+500'},
-    {category:'長袍',level:8,name:'死神之袍',stats:'防禦+48~+64 魔力+320~+400'},
-    {category:'長袍',level:8,name:'勇者之袍',stats:'防禦+51~+68 魔力+340~+425'},
-    {category:'長袍',level:8,name:'潔淨之袍+',stats:'防禦+45~+61 魔力+300~+400 回復+1~+5'},
-    {category:'長袍',level:9,name:'黑暗之袍',stats:'防禦+61~+76 魔力+380~+475'},
-    {category:'長袍',level:9,name:'聖袍',stats:'防禦-10 魔力+650'},
-    {category:'長袍',level:10,name:'靈魂之袍',stats:'防禦+71~+84 魔力+480~+525'},
-    {category:'長袍',level:10,name:'奇蹟之袍',stats:'防禦+80 魔力+400'},
-    {category:'長袍',level:11,name:'共鳴之袍',stats:'防禦+27~+30 回復+10 閃躲+10 魔力+514~+550'},
-    {category:'長袍',level:11,name:'和平之袍',stats:'防禦+120 必殺+10 魔力+179'},
-    // 靴子
-    {category:'靴子',level:1,name:'軟皮靴',stats:'防禦+5~+10 抗魔+3~+5'},
-    {category:'靴子',level:1,name:'皮靴',stats:'防禦+8~+15 抗魔+1~+3'},
-    {category:'靴子',level:2,name:'硬皮靴',stats:'防禦+10~+19 抗魔+6~+10'},
-    {category:'靴子',level:2,name:'長靴',stats:'防禦+13~+24 抗魔+2~+6'},
-    {category:'靴子',level:3,name:'厚底靴',stats:'防禦+17~+29 抗魔+9~+15'},
-    {category:'靴子',level:3,name:'編織的靴子',stats:'防禦+20~+34 抗魔+3~+9'},
-    {category:'靴子',level:4,name:'鎖鍊長靴',stats:'防禦+25~+38 抗魔+12~+20'},
-    {category:'靴子',level:4,name:'鎖鍊靴',stats:'防禦+28~+43 抗魔+4~+12'},
-    {category:'靴子',level:5,name:'蜥蝪靴',stats:'防禦+34~+48 抗魔+15~+25'},
-    {category:'靴子',level:5,name:'蜥蝪長靴',stats:'防禦+37~+53 抗魔+5~+15'},
-    {category:'靴子',level:5,name:'防護靴',stats:'防禦+16~+20 必殺+6 抗魔+1~+10'},
-    {category:'靴子',level:6,name:'鋼靴',stats:'防禦+43~+57 抗魔+18~+30'},
-    {category:'靴子',level:6,name:'鋼製長靴',stats:'防禦+47~+62 抗魔+6~+18'},
-    {category:'靴子',level:7,name:'水晶靴',stats:'防禦+54~+72 抗魔+21~+35'},
-    {category:'靴子',level:7,name:'銀靴',stats:'防禦+50~+67 敏捷+10 抗魔+12'},
-    {category:'靴子',level:7,name:'水龍之靴',stats:'防禦+100 魔力+150 必殺+5 命中+5'},
-    {category:'靴子',level:8,name:'流水之靴',stats:'防禦+61~+81 抗魔+24~+40'},
-    {category:'靴子',level:8,name:'芙蕾雅之靴',stats:'防禦+30 必殺+4 反擊+4 抗魔+16'},
-    {category:'靴子',level:8,name:'標準長靴+',stats:'防禦+55~+75 閃躲+1~+3 抗魔+8~+24'},
-    {category:'靴子',level:9,name:'鑽石靴',stats:'防禦+78~+91 抗魔+27~+45'},
-    {category:'靴子',level:9,name:'鑽石長靴',stats:'防禦+80 必殺+3 反擊+3 抗魔+18'},
-    {category:'靴子',level:10,name:'秘密之靴',stats:'防禦+85~+100 抗魔+40~+50'},
-    {category:'靴子',level:10,name:'龍之靴',stats:'防禦+85 敏捷+15 命中+3 閃躲+3 抗魔+15'},
-    {category:'靴子',level:11,name:'幸運靴',stats:'防禦+79~+92 閃躲+10 抗魔+20~+25'},
-    {category:'靴子',level:11,name:'試力鞋',stats:'防禦+101~+116 反擊+6 抗魔+55~+59'},
-    // 鞋子
-    {category:'鞋子',level:1,name:'運動鞋',stats:'防禦+2~+3 敏捷+3~+4'},
-    {category:'鞋子',level:1,name:'馬車鞋',stats:'防禦+3~+5 敏捷+5~+6'},
-    {category:'鞋子',level:2,name:'皮鞋',stats:'防禦+3~+6 敏捷+6~+8'},
-    {category:'鞋子',level:2,name:'安全鞋',stats:'防禦+4~+8 敏捷+8~+10'},
-    {category:'鞋子',level:3,name:'光之鞋',stats:'防禦+5~+9 敏捷+10~+12'},
-    {category:'鞋子',level:3,name:'戰鞋',stats:'防禦+7~+11 敏捷+11~+14'},
-    {category:'鞋子',level:4,name:'薄板鞋',stats:'防禦+8~+12 敏捷+13~+16'},
-    {category:'鞋子',level:4,name:'鎖鏈鞋',stats:'防禦+9~+14 敏捷+14~+18'},
-    {category:'鞋子',level:5,name:'蜥蝪鞋',stats:'防禦+11~+15 敏捷+16~+20'},
-    {category:'鞋子',level:5,name:'維京鞋',stats:'防禦+12~+17 敏捷+18~+22'},
-    {category:'鞋子',level:5,name:'特製舞鞋',stats:'防禦+13~+15 敏捷+19~+21 精神+8'},
-    {category:'鞋子',level:6,name:'戰鬥鞋',stats:'防禦+14~+18 敏捷+19~+24'},
-    {category:'鞋子',level:6,name:'騎士鞋',stats:'防禦+15~+20 敏捷+21~+26'},
-    {category:'鞋子',level:7,name:'妖精鞋',stats:'防禦+17~+23 敏捷+24~+30'},
-    {category:'鞋子',level:7,name:'紫水晶鞋',stats:'防禦+44~+54'},
-    {category:'鞋子',level:7,name:'水龍之鞋',stats:'防禦+30 敏捷+30 閃躲+2 命中+2'},
-    {category:'鞋子',level:8,name:'白金鞋',stats:'防禦+20~+26 敏捷+26~+32'},
-    {category:'鞋子',level:8,name:'精緻高根鞋',stats:'防禦+20~+26 敏捷-60 魔力+90'},
-    {category:'鞋子',level:8,name:'妖精鞋+',stats:'防禦+18~+24 敏捷+34~+40'},
-    {category:'鞋子',level:9,name:'神秘之鞋',stats:'防禦+23~+29 敏捷+30~+38'},
-    {category:'鞋子',level:9,name:'力量之鞋',stats:'防禦+23 敏捷+30'},
-    {category:'鞋子',level:10,name:'黃金鞋',stats:'防禦+27~+32 敏捷+36~+42'},
-    {category:'鞋子',level:10,name:'龍之鞋',stats:'防禦+37~+42 敏捷+31~+37 閃躲+3'},
-    {category:'鞋子',level:11,name:'守護之鞋',stats:'防禦+10~+15 敏捷+45~+64 閃躲+15'},
-    {category:'鞋子',level:11,name:'大木屐',stats:'防禦+47~+60 敏捷+11~+17 精神+5 必殺+6'},
-    // 盾牌
-    {category:'盾牌',level:1,name:'小圓盾',stats:'防禦+6~+11 抗魔+10~+12'},
-    {category:'盾牌',level:1,name:'小型盾',stats:'防禦+9~+17 抗魔+8~+10'},
-    {category:'盾牌',level:2,name:'板盾',stats:'防禦+12~+22 抗魔+20~+24'},
-    {category:'盾牌',level:2,name:'鳶盾',stats:'防禦+15~+28 抗魔+16~+20'},
-    {category:'盾牌',level:3,name:'漩渦重盾',stats:'防禦+20~+33 抗魔+30~+36'},
-    {category:'盾牌',level:3,name:'哥特盾',stats:'防禦+23~+39 抗魔+24~+30'},
-    {category:'盾牌',level:4,name:'士兵盾',stats:'防禦+29~+44 抗魔+40~+48'},
-    {category:'盾牌',level:4,name:'重盾',stats:'防禦+33~+50 抗魔+32~+40'},
-    {category:'盾牌',level:5,name:'蜥蝪盾',stats:'防禦+39~+55 抗魔+50~+60'},
-    {category:'盾牌',level:5,name:'反光之盾',stats:'防禦+43~+61 抗魔+40~+50'},
-    {category:'盾牌',level:5,name:'聖者之盾',stats:'防禦+26~+29 抗魔+50~+55 魔力+100~+120'},
-    {category:'盾牌',level:6,name:'風之盾',stats:'防禦+50~+67 抗魔+60~+72'},
-    {category:'盾牌',level:6,name:'獅子盾',stats:'防禦+54~+72 抗魔+48~+60'},
-    {category:'盾牌',level:7,name:'防守之盾',stats:'防禦+58~+77 抗魔+70~+84'},
-    {category:'盾牌',level:7,name:'黃金之盾',stats:'防禦+82~+103 抗魔+70'},
-    {category:'盾牌',level:7,name:'水龍之盾',stats:'攻擊+20 防禦+100'},
-    {category:'盾牌',level:8,name:'鏡之盾',stats:'防禦+66~+88 抗魔+80~+96'},
-    {category:'盾牌',level:8,name:'力量之盾',stats:'防禦+60 閃躲+8 抗魔+32~+40'},
-    {category:'盾牌',level:8,name:'防禦之盾+',stats:'防禦+59~+79 攻擊+5~+20 抗魔+64~+80'},
-    {category:'盾牌',level:9,name:'漆黑之盾',stats:'防禦+84~+105 抗魔+90~+108'},
-    {category:'盾牌',level:9,name:'火龍之盾',stats:'防禦+60 命中+2 閃躲+10 抗魔+36~+45'},
-    {category:'盾牌',level:10,name:'黑暗之盾',stats:'防禦+99~+116 抗魔+115'},
-    {category:'盾牌',level:10,name:'勇者之盾',stats:'防禦+90 魔力+80 抗魔+90'},
-    {category:'盾牌',level:11,name:'突猛盾',stats:'防禦+118 命中+8 抗魔+100'},
-    {category:'盾牌',level:11,name:'重型防禦盾',stats:'防禦+98 必殺+6 抗魔+141'},
+// CORS 代理（多個備援）
+const CORS_PROXIES = [
+    { prefix: 'https://api.codetabs.com/v1/proxy?quest=', encode: true },
+    { prefix: 'https://api.allorigins.win/raw?url=', encode: true },
+    { prefix: 'https://corsproxy.org/?', encode: true }
 ];
+let currentProxyIndex = 0;
 
-// 裝備種類列表
-const EQUIPMENT_CATEGORIES = ['劍','斧','槍','弓','杖','投具','小刀','頭盔','帽子','鎧甲','衣服','長袍','靴子','鞋子','盾牌'];
 const API_MARKET_BASE = 'https://member.starcg.net/market.php';
 const API_HISTORY_BASE = 'https://member.starcg.net/marketrecord.php';
 const MAX_PAGES = 20;
+
+// 嘗試 fetch，失敗則換下一個 proxy
+async function fetchWithProxy(targetUrl) {
+    let lastError;
+    // 加上時間戳繞過快取
+    const cacheBuster = `_t=${Date.now()}`;
+    const urlWithCache = targetUrl + (targetUrl.includes('?') ? '&' : '?') + cacheBuster;
+    
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+        const proxyIndex = (currentProxyIndex + i) % CORS_PROXIES.length;
+        const proxy = CORS_PROXIES[proxyIndex];
+        const url = proxy.prefix + (proxy.encode ? encodeURIComponent(urlWithCache) : urlWithCache);
+        
+        try {
+            const resp = await fetch(url, { cache: 'no-store' });
+            const text = await resp.text();
+            
+            // 檢查是否為錯誤回應
+            if (!resp.ok || text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
+                throw new Error(`Proxy ${proxyIndex} failed: ${resp.status}`);
+            }
+            
+            // 成功，記住這個 proxy
+            currentProxyIndex = proxyIndex;
+            return text;
+        } catch (err) {
+            console.warn(`Proxy ${proxyIndex} failed:`, err.message);
+            lastError = err;
+        }
+    }
+    throw new Error('所有代理伺服器都無法連線，請稍後再試');
+}
 
 let allMarketItems = [];
 let allHistoryLogs = [];
@@ -1555,7 +1010,6 @@ const chartInstances = {};
 document.addEventListener('DOMContentLoaded', () => {
     renderQuickTags();
     initEventListeners();
-    initEquipmentPanel();
 });
 
 function initEventListeners() {
@@ -1572,6 +1026,9 @@ function initEventListeners() {
     ['currencyFilter', 'serverFilter', 'durabilityFilter'].forEach(id => {
         document.getElementById(id).addEventListener('change', applyFilters);
     });
+    
+    // 只搜尋寵物 checkbox
+    document.getElementById('petOnlyFilter').addEventListener('change', applyFilters);
     
     // 匯率變更時重新渲染
     document.getElementById('exchangeRate').addEventListener('input', applyFilters);
@@ -1601,9 +1058,7 @@ function renderQuickTags() {
 }
 
 function quickSearch(tag) {
-    // 如果標籤包含 " [Lv." 則只使用名稱部分搜尋
-    const searchTerm = tag.includes(' [Lv.') ? tag.split(' [Lv.')[0] : tag;
-    document.getElementById('searchInput').value = searchTerm;
+    document.getElementById('searchInput').value = tag;
     searchMarket();
 }
 
@@ -1618,96 +1073,6 @@ function addTag(tag) {
         quickTags.push(tag);
         localStorage.setItem('starcg_quickTags', JSON.stringify(quickTags));
         renderQuickTags();
-    }
-}
-
-/* ========================================
-   裝備面板功能
-======================================== */
-function initEquipmentPanel() {
-    // 初始化種類下拉選單
-    const categorySelect = document.getElementById('equipmentCategoryFilter');
-    EQUIPMENT_CATEGORIES.forEach(cat => {
-        const option = document.createElement('option');
-        option.value = cat;
-        option.textContent = cat;
-        categorySelect.appendChild(option);
-    });
-
-    // 渲染初始列表
-    renderEquipmentList(EQUIPMENT_DATA);
-}
-
-function toggleEquipmentPanel() {
-    const panel = document.getElementById('equipmentPanel');
-    panel.classList.toggle('open');
-}
-
-function filterEquipments() {
-    const category = document.getElementById('equipmentCategoryFilter').value;
-    const keyword = document.getElementById('equipmentSearchInput').value.trim().toLowerCase();
-
-    let filtered = EQUIPMENT_DATA;
-
-    // 種類篩選
-    if (category !== 'all') {
-        filtered = filtered.filter(eq => eq.category === category);
-    }
-
-    // 名稱搜尋
-    if (keyword) {
-        filtered = filtered.filter(eq => eq.name.toLowerCase().includes(keyword));
-    }
-
-    renderEquipmentList(filtered);
-}
-
-function renderEquipmentList(equipments) {
-    const container = document.getElementById('equipmentList');
-
-    if (equipments.length === 0) {
-        container.innerHTML = '<div class="equipment-empty">找不到符合的裝備</div>';
-        return;
-    }
-
-    container.innerHTML = equipments.map(eq => `
-        <div class="equipment-item">
-            <div class="equipment-info">
-                <div class="equipment-row">
-                    <div class="equipment-main">
-                        <span class="equipment-name">${escapeHtml(eq.name)}</span>
-                        <span class="equipment-level">[Lv.${eq.level}]</span>
-                    </div>
-                    <span class="equipment-stats">${escapeHtml(eq.stats)}</span>
-                </div>
-            </div>
-            <div class="equipment-actions">
-                <button class="btn-search" onclick="searchEquipment('${escapeHtml(eq.name)}')">搜尋</button>
-                <button class="btn-add" onclick="addEquipmentToQuickTag('${escapeHtml(eq.name)}', ${eq.level})">+</button>
-            </div>
-        </div>
-    `).join('');
-}
-
-function searchEquipment(name) {
-    document.getElementById('searchInput').value = name;
-    searchMarket();
-    // 在手機上自動收合面板
-    if (window.innerWidth <= 768) {
-        document.getElementById('equipmentPanel').classList.remove('open');
-    }
-}
-
-function addEquipmentToQuickTag(name, level) {
-    const tagWithLevel = `${name} [Lv.${level}]`;
-    if (!quickTags.includes(tagWithLevel)) {
-        quickTags.push(tagWithLevel);
-        localStorage.setItem('starcg_quickTags', JSON.stringify(quickTags));
-        renderQuickTags();
-        // 顯示提示
-        alert(`已加入快速搜尋：${tagWithLevel}`);
-    } else {
-        alert(`${tagWithLevel} 已存在於快速搜尋中`);
     }
 }
 
@@ -1747,26 +1112,25 @@ async function searchMarket() {
     }
 }
 
+// 標準化字串：全形括號轉半形、統一空格等
+function normalizeStr(str) {
+    return str
+        .replace(/（/g, '(')
+        .replace(/）/g, ')')
+        .replace(/【/g, '[')
+        .replace(/】/g, ']')
+        .replace(/　/g, ' ');
+}
+
 async function fetchMarketData(keyword) {
     const items = [];
     let page = 1;
     let hasMore = true;
+    const normalizedKeyword = normalizeStr(keyword);
     
     while (hasMore && page <= MAX_PAGES) {
         const targetUrl = `${API_MARKET_BASE}?ajax=1&type=all&server=all&exact=0&page=${page}&search=${encodeURIComponent(keyword)}`;
-        const url = CORS_PROXY + encodeURIComponent(targetUrl);
-        const resp = await fetch(url);
-        const text = await resp.text();
-        
-        // 檢查是否為 HTML 錯誤頁（520 等）
-        if (text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
-            throw new Error('伺服器暫時無法連線，請稍後再試');
-        }
-        
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${text.substring(0, 100)}`);
-        }
-        
+        const text = await fetchWithProxy(targetUrl);
         const data = JSON.parse(text);
         
         if (data.totalFiltered === 0) break;
@@ -1784,32 +1148,33 @@ async function fetchMarketData(keyword) {
             
             // 道具
             (itemsMap[cdkey] || []).forEach(item => {
-                if (item.ITEM_TRUENAME.includes(keyword)) {
-                    // 🔧 DEBUG: 顯示道具原始資料
-                    console.log('【道具原始資料】', item.ITEM_TRUENAME, item);
-                    
+                const normalizedItemName = normalizeStr(item.ITEM_TRUENAME);
+                if (normalizedItemName.includes(normalizedKeyword)) {
                     // 處理改造圖等級區分（嘗試多種可能的欄位名）
                     let displayName = item.ITEM_TRUENAME;
                     let gradeTag = '';
                     let seedTag = '';
                     const itemLevel = item.ITEM_LEVEL || item.level || item.Level || item.ITEM_LV || item.lv || 0;
                     if (item.ITEM_TRUENAME.includes('改造圖') && itemLevel > 0) {
-                        if (itemLevel === 5) gradeTag = '<span class="grade-normal">[普通]</span>';
-                        else if (itemLevel === 6) gradeTag = '<span class="grade-silver">[銀]</span>';
-                        else if (itemLevel === 7) gradeTag = '<span class="grade-gold">[金]</span>';
-                        else gradeTag = `<span class="grade-normal">[Lv${itemLevel}]</span>`;
+                        if (itemLevel === 5) gradeTag = '<span class="grade-normal">普通</span>';
+                        else if (itemLevel === 6) gradeTag = '<span class="grade-silver">銀</span>';
+                        else if (itemLevel === 7) gradeTag = '<span class="grade-gold">金</span>';
+                        else gradeTag = `<span class="grade-normal">Lv${itemLevel}</span>`;
                     }
                     
                     // 處理重來的種子 BP 配點顯示
                     if (item.ITEM_TRUENAME.includes('重來的種子') && item.ITEM_ARGUMENT) {
-                        const bpNames = ['體', '力', '強', '速', '魔'];
+                        const bpNames = ['體', '攻', '防', '敏', '魔'];
                         const bpValues = item.ITEM_ARGUMENT.split('|').map(Number);
-                        let bpParts = [];
+                        let plusParts = [];
+                        let minusParts = [];
                         bpValues.forEach((val, idx) => {
-                            if (val > 0) bpParts.push(`<span class="bp-plus">+${val}${bpNames[idx]}</span>`);
-                            else if (val < 0) bpParts.push(`<span class="bp-minus">${val}${bpNames[idx]}</span>`);
+                            if (val > 0) plusParts.push(`<span class="bp-plus">+${val}${bpNames[idx]}</span>`);
+                            else if (val < 0) minusParts.push(`<span class="bp-minus">${val}${bpNames[idx]}</span>`);
                         });
-                        if (bpParts.length > 0) seedTag = bpParts.join(' ');
+                        // 固定順序：+1在前，-1在後
+                        const allParts = [...plusParts, ...minusParts];
+                        if (allParts.length > 0) seedTag = allParts.join(' ');
                     }
                     
                     items.push({
@@ -1836,7 +1201,8 @@ async function fetchMarketData(keyword) {
             
             // 寵物
             (petsMap[cdkey] || []).forEach(pet => {
-                if (pet.Name.includes(keyword)) {
+                const normalizedPetName = normalizeStr(pet.Name);
+                if (normalizedPetName.includes(normalizedKeyword)) {
                     // 寵物標籤：等級、改造、技能欄數
                     const petLv = pet.Lv || 1;
                     const trans = pet.Trans || 0;
@@ -1914,19 +1280,7 @@ async function fetchHistoryData(keyword) {
     
     while (keepFetching && page <= 100) {
         const targetUrl = `${API_HISTORY_BASE}?ajax=1&type=all&page=${page}&search=${encodeURIComponent(keyword)}`;
-        const url = CORS_PROXY + encodeURIComponent(targetUrl);
-        const resp = await fetch(url);
-        const text = await resp.text();
-        
-        // 檢查是否為 HTML 錯誤頁（520 等）
-        if (text.startsWith('<!') || text.startsWith('<html') || text.includes('error code:')) {
-            throw new Error('伺服器暫時無法連線，請稍後再試');
-        }
-        
-        if (!resp.ok) {
-            throw new Error(`HTTP ${resp.status}: ${text.substring(0, 100)}`);
-        }
-        
+        const text = await fetchWithProxy(targetUrl);
         const data = JSON.parse(text);
         
         if (!data.logs || data.logs.length === 0) break;
@@ -1938,18 +1292,22 @@ async function fetchHistoryData(keyword) {
                 break;
             }
             
-            // 解析物品名稱
-            const parts = log.buff.split('：');
+            // 解析物品名稱和數量（格式：「購買X個：物品名稱」或「購買X個:物品名稱」）
+            const qtyMatch = log.buff.match(/購買(\d+)個[：:]/);
+            const quantity = qtyMatch ? parseInt(qtyMatch[1]) : 1;
+            const parts = log.buff.split(/[：:]/);
             const itemName = parts.length > 1 ? parts[1] : parts[0];
             
-            // 還原售價（扣除 10% 手續費）
-            const originalPrice = Math.ceil(log.price / (log.pricetype === 1 ? 0.94 : 0.9));
+            // 還原售價（扣除手續費）並計算單價
+            const originalTotalPrice = Math.ceil(log.price / (log.pricetype === 1 ? 0.94 : 0.9));
+            const unitPrice = Math.ceil(originalTotalPrice / quantity);
             
             logs.push({
                 item: itemName,
-                price: originalPrice,
+                price: unitPrice,
                 pricetype: log.pricetype,
-                time: log.time_text
+                time: log.time_text,
+                quantity: quantity
             });
         }
         
@@ -1966,8 +1324,14 @@ function applyFilters() {
     const currency = document.getElementById('currencyFilter').value;
     const server = document.getElementById('serverFilter').value;
     const durability = document.getElementById('durabilityFilter').value;
+    const petOnly = document.getElementById('petOnlyFilter').checked;
     
     let filtered = [...allMarketItems];
+    
+    // 只搜尋寵物
+    if (petOnly) {
+        filtered = filtered.filter(i => i.isPet === true);
+    }
     
     // 幣種篩選
     if (currency !== 'all') {
@@ -2277,7 +1641,7 @@ function simplifyData(data) {
 
 function updateStats(items) {
     const currency = document.getElementById('currencyFilter').value;
-    const rate = parseInt(document.getElementById('exchangeRate').value) || 275;
+    const rate = parseInt(document.getElementById('exchangeRate').value) || 260;
     
     if (currency === 'all') {
         // 分別計算兩種幣種的數量
